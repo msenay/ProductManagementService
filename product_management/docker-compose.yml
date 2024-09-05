@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: db_product_management
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:${POSTGRES_PORT:-5432}"
+    restart: always
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./run_api
+    container_name: api_product_management
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    ports:
+      - "${API_PORT:-8000}:${API_PORT:-8000}"
+    depends_on:
+      - db
+    restart: always
+
+  redis:
+    image: redis:alpine
+    command: redis-server --loglevel warning
+    restart: always
+    ports:
+      - "${REDIS_PORT:-6379}:${REDIS_PORT:-6379}"
+    volumes:
+      - .:/app
+
+  dramatiq:
+    container_name: dramatiq
+    build:
+      context: .
+    command: dramatiq products.tasks.tasks --threads 1 --queues default --path /app
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:
