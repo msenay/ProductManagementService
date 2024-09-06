@@ -133,4 +133,6 @@ Use the imported requests to test the backend APIs.
 ```
 
 ### Testing
-python manage.py test
+```bash
+docker-compose run api python manage.py test
+```
