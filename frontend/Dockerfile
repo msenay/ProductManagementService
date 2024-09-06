@@ -11,6 +11,9 @@ RUN npm install
 # Copy the rest of the app
 COPY . /app
 
+## Run tests
+RUN npm test -- --watchAll=false
+
 # Build the app
 RUN npm run build
 

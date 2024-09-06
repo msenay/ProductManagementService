@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {Link} from 'react-router-dom';
 import axios from 'axios';
-import Layout from './Layout';
+import Layout from '../components/Layout';
 
 const SignIn = () => {
     const [username, setUsername] = useState('');

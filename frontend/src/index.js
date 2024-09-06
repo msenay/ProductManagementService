@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import './index.css';
-import Products from './Products';
-import SingIn from './SignIn';
-import SignUp from './SignUp';
-import setupAxios from './setupAxios';
+import './styles/index.css';
+import Products from './pages/Products';
+import SingIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
+import setupAxios from './services/setupAxios';
 
 
 

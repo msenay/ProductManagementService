@@ -59,8 +59,13 @@ Copy the [.env.template](backend/.env.template) to backend/.env:
 cp backend/.env.template backend/.env
 ```
 Modify the backend/.env file to add the correct values for database connection, Redis, email settings, and API configuration.
-Example for backend/.env:
 
+#### ! Please change here in order to get email. This will create an admin user for you. ! so you get notify when a product is uploaded. !
+```env
+DJANGO_ADMIN_USERNAME=<DJANGO_ADMIN_USERNAME>
+DJANGO_ADMIN_EMAIL=<DJANGO_ADMIN_EMAIL>
+DJANGO_ADMIN_PASSWORD=<DJANGO_ADMIN_PASSWORD>
+```
 ##### Frontend Setup:
 Copy the [.env.template](frontend/.env.template) to frontend/.env:
 ```bash
@@ -176,7 +181,7 @@ Frontend: The React.js application that communicates with the backend.
 ```
 
 ####  Step 5: Testing
-A Postman collection is provided in the root directory (Ounass_Case_Study.postman_collection.json) for testing the APIs. You can import this collection into Postman and use it to test the various API endpoints.
+A Postman collection is provided in the root directory [postman_collection.json](backend/Ounass_Case_Study.postman_collection.json) for testing the APIs. You can import this collection into Postman and use it to test the various API endpoints.
 Open Postman. Import the collection by going to File > Import and selecting Ounass Case Study.postman_collection.json.
 
 <p>Backend Unit Tests: They will run automatically with docker-compose up --build. Please check backend/run_api script.</p>

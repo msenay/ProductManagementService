@@ -1,5 +1,5 @@
 import axios from 'axios';
-import './App.css';
+import './styles/App.css';
 
 // Axios token setup
 axios.interceptors.request.use(
@@ -24,3 +24,13 @@ axios.interceptors.response.use(
   }
 );
 
+function App() {
+  return (
+    <div>
+      <h1>Learn React</h1>
+      <p>Welcome to the App</p>
+    </div>
+  );
+}
+
+export default App;

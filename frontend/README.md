@@ -27,14 +27,32 @@ This project is the frontend part of the Ounass Product Management platform. The
 ```text
 src/
 │
-├── App.js               # Main entry point for the application.
-├── Layout.js            # Layout component that includes header, footer, and content.
-├── Products.js          # Main page for viewing, filtering, and uploading products.
-├── SignIn.js            # Page for user login.
-├── SignUp.js            # Page for user registration.
-├── PrivateRoute.js      # Ensures that certain pages are accessible only by authenticated users.
-├── setupAxios.js        # Axios configuration for API requests.
-└── index.css            # Styling for the entire application.
+├── components/                 # Reusable components used across pages
+│   ├── Layout.js               # Main layout component with header, footer, and content area
+│   └── PrivateRoute.js         # Ensures certain routes are accessible only to authenticated users
+│
+├── pages/                      # Specific pages for the application
+│   ├── Products.js             # Page to view, filter, and upload products
+│   ├── SignIn.js               # User sign-in (login) page
+│   └── SignUp.js               # User sign-up (registration) page
+│
+├── services/                   # Service layer or API-related configuration
+│   └── setupAxios.js           # Axios configuration, including interceptors for token handling
+│
+├── styles/                     # CSS styles for the application
+│   ├── App.css                 # Main stylesheet for the App component
+│   └── index.css               # Global styles for the application
+│
+├── tests/                      # Test files for various components and functionality
+│   ├── App.test.js             # Tests for the main App component
+│   ├── SignIn.test.js          # Unit tests for the SignIn component
+│   └── SignUp.test.js          # Unit tests for the SignUp component
+│
+├── App.js                      # Main component that renders the entire application
+├── index.js                    # Entry point to the React application, renders the App component
+├── reportWebVitals.js          # For measuring and reporting app performance
+└── setupTests.js               # Configuration and setup for Jest testing
+
 ```
 ## How to Run the Project
 
@@ -72,3 +90,7 @@ The frontend interacts with the following backend API endpoints:
 
 The application uses JWT tokens for authentication. After logging in, the token is stored in localStorage, and it is sent with each API request that requires authorization.
 
+### Testing
+```bash
+npm test -- --watchAll=false
+```
