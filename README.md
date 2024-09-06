@@ -33,11 +33,11 @@ ProductManagementService/
 
 ## Features
 
-#### Frontend
+#### [Frontend](frontend)
 User Authentication: Users can register, log in, and log out.
 Product Listing: Users can view paginated, filtered, and sorted product listings.
 Product Upload: Users can upload products via an XML file.
-#### Backend
+#### [Backend](backend)
 User Management: User registration and authentication with token-based JWT.
 Product Management: Upload, list, and filter products via RESTful APIs.
 Background Tasks: Asynchronous task queue using Dramatiq to send notification emails to admins after product uploads.
@@ -54,7 +54,7 @@ cd ProductManagementService
 Both the frontend and backend require environment variables for configuration. These variables are defined in .env.template files located in the respective directories.You can do it manually or via terminal commands like above.
 
 ##### Backend Setup:
-Copy the backend/.env.template to backend/.env:
+Copy the [.env.template](backend/.env.template) to backend/.env:
 ```bash
 cp backend/.env.template backend/.env
 ```
@@ -62,7 +62,7 @@ Modify the backend/.env file to add the correct values for database connection, 
 Example for backend/.env:
 
 ##### Frontend Setup:
-Copy the frontend/.env.template to frontend/.env:
+Copy the [.env.template](frontend/.env.template) to frontend/.env:
 ```bash
 cp frontend/.env.template frontend/.env
 ```
@@ -78,12 +78,15 @@ docker-compose up --build
 Once Docker Compose finishes building and starting the containers, you can access the services:
 
 ##### Frontend:
-Open your browser and go to http://localhost:3000.
-<p>Frontend has its own README.md file so you can check it in frontend directory</p>
+Open your browser and go to [http://localhost:3000](http://localhost:3000).
+
+Frontend has its own [README.md](frontend/README.md) file so you can check it in frontend directory.
+
 ##### Backend API:
-Access the API at http://localhost:8000.
-For example, the product listing endpoint is available at http://localhost:8000/list-products/.
-<p>Backend has its own README.md file so you can check it in Backend directory</p>
+Access the API at [http://localhost:8000](http://localhost:8000).
+For example, the product listing endpoint is available at [http://localhost:8000/list-products/](http://localhost:8000/list-products/).
+
+Backend has its own [README.md](backend/README.md) file so you can check it in the Backend directory.
 
 ##### Docker Compose Configuration
 The docker-compose.yml file manages all the services needed for the project:
@@ -171,10 +174,29 @@ Redis: Used as the message broker for the Dramatiq task queue.
 Dramatiq Worker (dramatiq): Processes background tasks like sending email notifications.
 Frontend: The React.js application that communicates with the backend.
 ```
-####  Step 5: Testing APIs Using Postman
-A Postman collection is provided in the root directory (Ounass_Case_Study.postman_collection.json) for testing the APIs. You can import this collection into Postman and use it to test the various API endpoints.
 
+####  Step 5: Testing
+A Postman collection is provided in the root directory (Ounass_Case_Study.postman_collection.json) for testing the APIs. You can import this collection into Postman and use it to test the various API endpoints.
 Open Postman. Import the collection by going to File > Import and selecting Ounass Case Study.postman_collection.json.
+
+<p>Backend Unit Tests: They will run automatically with docker-compose up --build. Please check backend/run_api script.</p>
+
+#### [run_api](backend/run_api) Script Explanation:
+```text
+
+This Bash script automates the database migration, admin user creation, testing, and starting the Django development server. Here's what each step does:
+
+Make Migrations:
+The script first generates migration files for the products app by running python manage.py makemigrations products. This ensures that any changes in the models are reflected in migration files.
+Apply Migrations:
+The script then applies any pending migrations to the database with python manage.py migrate --noinput. This step sets up the database schema based on the models.
+Check for Admin User:
+The script checks if an admin (superuser) already exists in the database. If no admin exists, it creates a new admin user using the DJANGO_ADMIN_USERNAME, DJANGO_ADMIN_EMAIL, and DJANGO_ADMIN_PASSWORD environment variables. This is useful for testing purposes or setting up the first admin user.
+Run Tests:
+Before starting the server, the script runs the Django tests using python manage.py test. If any tests fail, the script exits and prevents the server from starting to ensure only properly functioning code is deployed.
+Start the Django Server:
+If all tests pass, the script starts the Django development server, listening on all interfaces (0.0.0.0) at port 8000.
+```
 
 ####  Step 6: Stopping the Services
 To stop the running containers, use the following command:
@@ -182,6 +204,14 @@ To stop the running containers, use the following command:
 ```bash
 docker-compose down
 ```
+
+### Project Screenshots
+<h3>Register Page</h3>
+<img src="photoshoot/register.png">
+<h3>Signin Page</h3>
+<img src="photoshoot/signin.png">
+<h3>Products Page</h3>
+<img src="photoshoot/products.png">
 
 ### Conclusion
 
