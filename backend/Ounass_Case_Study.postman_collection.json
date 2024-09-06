@@ -1,0 +1,235 @@
+{
+	"info": {
+		"_postman_id": "5f512291-7ab7-4844-95a7-5cd94482ddf8",
+		"name": "Ounass Case Study",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21545039"
+	},
+	"item": [
+		{
+			"name": "logout",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"murat\",\n    \"password\": \"12345\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/logout/",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"logout",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "signup",
+			"request": {
+				"method": "POST",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "auth-protected-check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8000/auth-protected-check/",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"auth-protected-check",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "health-check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8000/health-check/",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"health-check",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"muratsenay\",\n    \"password\": \"12345\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/login/",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"login",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "product",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token 8f9f43d20f509f01d2da3999acc515f3d66c1fd4",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/Users/muratsenay/Downloads/feed-lw.xml"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:8000/upload-products/",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"upload-products",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "list_products",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token 8f9f43d20f509f01d2da3999acc515f3d66c1fd4",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:8000/list-products?page=2",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"list-products"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "product_detail",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token e67792d07fdf71737b7134227020322d1ca23a29",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:8000/product-detail/205042570_242/",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"product-detail",
+						"205042570_242",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "filter_options",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token f2f1942c6e4e23a95a92d9ed09f15bfb50d8d3e7",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:8000/filter-options/",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"filter-options",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

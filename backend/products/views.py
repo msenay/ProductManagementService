@@ -6,9 +6,10 @@ from rest_framework.decorators import api_view, permission_classes, parser_class
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.authtoken.models import Token
 
+from products.enums import ProductPagination
 from products.core import handle_uploaded_file, notify_admins_for_products, notify_failure_to_admins
 from products.models import CustomUser, Product
 from products.serializers import UserSerializer, ProductSerializer
@@ -35,9 +36,12 @@ def signup(request):
         there are validation errors.
     """
     serializer = UserSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response({"message": "Signed up successfully!"}, status=status.HTTP_201_CREATED)
+    try:
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response({"message": "Signed up successfully!"}, status=status.HTTP_201_CREATED)
+    except serializers.ValidationError as e:
+        return Response(e.detail, status=status.HTTP_409_CONFLICT)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -63,7 +67,7 @@ def login(request):
     user = authenticate(username=username, password=password)
     if user is not None:
         token, _ = Token.objects.get_or_create(user=user)
-        return Response({"token": token.key})
+        return Response({"token": token.key, "username": username}, status=status.HTTP_200_OK)
 
     if not CustomUser.objects.filter(username=username).exists():
         return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -102,7 +106,7 @@ def protected_view(request):
         Response: JSON response with a success message and status code 200 if
         the user is authenticated.
     """
-    return Response({"message": f"User {request.user.username} with an email {request.user.email} is authenticated."})
+    return Response({"message": f"User {request.user.username} with an email {request.user.email} is authenticated."}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -156,12 +160,6 @@ def upload_products(request):
 def list_products(request):
     """
     List products with pagination, filtering, and sorting.
-
-    This endpoint returns a paginated list of products filtered by condition, gender, and brand.
-    The list can be sorted by price and title in ascending and descending order.
-
-    Returns:
-        Response: JSON response containing the product data.
     """
     products = Product.objects.all()
 
@@ -186,12 +184,15 @@ def list_products(request):
     products = products.order_by(sort_by)
 
     # Pagination
-    paginator = Paginator(products, 5)  # 5 products per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    paginator = ProductPagination()
+    paginated_products = paginator.paginate_queryset(products, request)
+    serializer = ProductSerializer(paginated_products, many=True)
 
-    serializer = ProductSerializer(page_obj, many=True)
-    return Response(serializer.data)
+    # Adding total pages to the response
+    response_data = paginator.get_paginated_response(serializer.data).data
+    response_data['total_pages'] = paginator.page.paginator.num_pages
+
+    return Response(response_data)
 
 
 @api_view(['GET'])
@@ -215,3 +216,21 @@ def product_detail(request, product_id):
     except Exception as e:
         logger.error(f"Error retrieving product with ID {product_id}: {e}")
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def filter_options(request):
+    """
+    Get distinct filter values for condition, gender, and brand.
+    Returns distinct values for the condition, gender, and brand fields.
+    """
+    conditions = Product.objects.values_list('condition', flat=True).distinct()
+    genders = Product.objects.values_list('gender', flat=True).distinct()
+    brands = Product.objects.values_list('brand', flat=True).distinct()
+
+    return Response({
+        'conditions': list(conditions),
+        'genders': list(genders),
+        'brands': list(brands)
+    })

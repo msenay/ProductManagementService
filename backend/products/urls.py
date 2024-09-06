@@ -1,5 +1,5 @@
 from django.urls import path
-from products.views import signup, login, protected_view, logout, health_check, upload_products, list_products, product_detail
+from products.views import signup, login, protected_view, logout, health_check, upload_products, list_products, product_detail, filter_options
 
 urlpatterns = [
     path('signup/', signup, name='signup'),
@@ -10,4 +10,5 @@ urlpatterns = [
     path('upload-products/', upload_products, name='upload_products'),
     path('list-products/', list_products, name='list_products'),
     path('product-detail/<str:product_id>/', product_detail, name='product_detail'),
+    path('filter-options/', filter_options, name='filter_options'),
 ]

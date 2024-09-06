@@ -1,4 +1,4 @@
-# Register your models here.
+# SignUp your models here.
 from django.contrib import admin
 from products.models import Product
 

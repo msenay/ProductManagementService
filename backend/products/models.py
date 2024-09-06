@@ -44,6 +44,8 @@ class Product(models.Model):
     custom_label_3 = models.CharField(max_length=255, null=True, blank=True)
     custom_label_4 = models.CharField(max_length=255, null=True, blank=True)
 
+    objects = models.Manager()
+
     def __str__(self):
         return self.title
 

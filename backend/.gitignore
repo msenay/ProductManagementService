@@ -1,3 +1,4 @@
 .env
 staticfiles
 .idea
+debug.log

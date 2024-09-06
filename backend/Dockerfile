@@ -1,12 +1,12 @@
-# Dockerfile
-
 # Use official Python image as base
 FROM python:3.11-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH /app:/app/product_management
+
+# Set Python path to include the project root
+ENV PYTHONPATH=/app:/app/product_management:/app/products
 
 # Set the work directory
 WORKDIR /app
@@ -20,6 +20,3 @@ COPY . /app/
 
 # Make the scripts executable
 RUN chmod +x /app/run_api
-
-
-

@@ -3,25 +3,25 @@ version: '3.8'
 services:
   db:
     image: postgres:latest
-    container_name: db_product_management
+    container_name: db_postgres
     env_file:
-      - .env
+      - ./backend/.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "${POSTGRES_PORT:-5432}:${POSTGRES_PORT:-5432}"
     restart: always
 
-  web:
+  api:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     command: ./run_api
-    container_name: api_product_management
+    container_name: api
     env_file:
-      - .env
+      - ./backend/.env
     volumes:
-      - .:/app
+      - ./backend:/app
     ports:
       - "${API_PORT:-8000}:${API_PORT:-8000}"
     depends_on:
@@ -35,21 +35,38 @@ services:
     ports:
       - "${REDIS_PORT:-6379}:${REDIS_PORT:-6379}"
     volumes:
-      - .:/app
+      - redis_data:/data
 
   dramatiq:
     container_name: dramatiq
     build:
-      context: .
+      context: ./backend
     command: dramatiq products.tasks.tasks --threads 1 --queues default --path /app
     restart: always
     env_file:
-      - .env
+      - ./backend/.env
     volumes:
-      - .:/app
+      - ./backend:/app
     depends_on:
       - db
       - redis
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: always
+    env_file:
+      - ./frontend/.env
+    ports:
+      - "${REACT_APP_PORT:-3000}:${REACT_APP_PORT:-3000}"
+    depends_on:
+      - api
+      - dramatiq
+      - redis
+      - db
+
 volumes:
   postgres_data:
+  redis_data:
