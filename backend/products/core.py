@@ -32,13 +32,13 @@ def handle_uploaded_file(file) -> Tuple[List[str], List[str], List[Dict]]:
         logger.error(f"Failed to parse XML file {file.name}", exc_info=e)
         raise e
 
-    namespace = {'g': 'http://base.google.com/ns/1.0'}
+    namespace = {"g": "http://base.google.com/ns/1.0"}
     existing_product_ids: List[str] = []
     problematic_product_ids: List[str] = []
     product_instances_list: List[Dict] = []
 
-    for item in root.findall('./channel/item'):
-        product_id: str = item.find('g:id', namespace).text
+    for item in root.findall("./channel/item"):
+        product_id: str = item.find("g:id", namespace).text
 
         if Product.objects.filter(id=product_id).exists():
             existing_product_ids.append(product_id)
@@ -67,30 +67,28 @@ def create_product_instance(item: ET.Element, namespace: Dict[str, str]) -> Prod
     Returns:
         Product: The created Product instance.
     """
-    product_id: str = item.find('g:id', namespace).text
-    title: str = item.find('title').text
-    product_type: str = item.find('g:product_type', namespace).text
-    link: str = item.find('link').text
-    description: str = item.find('description').text
-    image_link: str = item.find('g:image_link', namespace).text
-    price: float = float(item.find('g:price', namespace).text.split()[0])
-    sale_price_text: Optional[str] = item.find('g:sale_price', namespace).text
+    product_id: str = item.find("g:id", namespace).text
+    title: str = item.find("title").text
+    product_type: str = item.find("g:product_type", namespace).text
+    link: str = item.find("link").text
+    description: str = item.find("description").text
+    image_link: str = item.find("g:image_link", namespace).text
+    price: float = float(item.find("g:price", namespace).text.split()[0])
+    sale_price_text: Optional[str] = item.find("g:sale_price", namespace).text
     sale_price: Optional[float] = float(sale_price_text.split()[0]) if sale_price_text else None
-    finalprice: float = float(item.find('g:finalprice', namespace).text.split()[0])
-    availability: str = item.find('g:availability', namespace).text
-    google_product_category: str = item.find('g:google_product_category', namespace).text
-    brand: str = item.find('g:brand', namespace).text
-    gtin: str = item.find('g:gtin', namespace).text
-    item_group_id: str = item.find('g:item_group_id', namespace).text
-    condition: str = item.find('g:condition', namespace).text
-    age_group: str = item.find('g:age_group', namespace).text
-    color: str = item.find('g:color', namespace).text
-    gender: str = item.find('g:gender', namespace).text
-    quantity: int = int(item.find('g:quantity', namespace).text)
+    finalprice: float = float(item.find("g:finalprice", namespace).text.split()[0])
+    availability: str = item.find("g:availability", namespace).text
+    google_product_category: str = item.find("g:google_product_category", namespace).text
+    brand: str = item.find("g:brand", namespace).text
+    gtin: str = item.find("g:gtin", namespace).text
+    item_group_id: str = item.find("g:item_group_id", namespace).text
+    condition: str = item.find("g:condition", namespace).text
+    age_group: str = item.find("g:age_group", namespace).text
+    color: str = item.find("g:color", namespace).text
+    gender: str = item.find("g:gender", namespace).text
+    quantity: int = int(item.find("g:quantity", namespace).text)
 
-    custom_labels: List[str] = [
-        item.find(f'g:custom_label_{i}', namespace).text or '' for i in range(5)
-    ]
+    custom_labels: List[str] = [item.find(f"g:custom_label_{i}", namespace).text or "" for i in range(5)]
 
     product_instance: Product = Product.objects.create(
         id=product_id,
@@ -123,12 +121,7 @@ def create_product_instance(item: ET.Element, namespace: Dict[str, str]) -> Prod
 
 
 def notify_admins_for_products(
-        user: CustomUser,
-        file_name: str,
-        products: List[Dict],
-        existing_product_ids: List[str],
-        problematic_product_ids: List[str],
-        all_admins: QuerySet
+    user: CustomUser, file_name: str, products: List[Dict], existing_product_ids: List[str], problematic_product_ids: List[str], all_admins: QuerySet
 ) -> None:
     """
     Notify admins for each successfully uploaded product.
@@ -147,25 +140,20 @@ def notify_admins_for_products(
     for admin in all_admins:
         for product in products:
             notification_data = {
-                'user_email': user.email,
-                'user_name': user.username,
-                'admin_email': admin.email,
-                'file_name': file_name,
-                'existing_product_ids': existing_product_ids,
-                'problematic_product_ids': problematic_product_ids,
-                'product': product,
-                'status': DocumentEventsEnum.NOTIFY_SUCCESS.value,
+                "user_email": user.email,
+                "user_name": user.username,
+                "admin_email": admin.email,
+                "file_name": file_name,
+                "existing_product_ids": existing_product_ids,
+                "problematic_product_ids": problematic_product_ids,
+                "product": product,
+                "status": DocumentEventsEnum.NOTIFY_SUCCESS.value,
             }
             logger.info(f"Sending notification to {admin.email} for product {product['id']}")
             send_notification.send(notification_data)
 
 
-def notify_failure_to_admins(
-        user: CustomUser,
-        file_name: str,
-        error: str,
-        all_admins: QuerySet
-) -> None:
+def notify_failure_to_admins(user: CustomUser, file_name: str, error: str, all_admins: QuerySet) -> None:
     """
     Notify admins if the product upload failed.
 
@@ -181,12 +169,12 @@ def notify_failure_to_admins(
     for admin in all_admins:
         try:
             notification_data = {
-                'user_email': user.email,
-                'user_name': user.username,
-                'admin_email': admin.email,
-                'file_name': file_name,
-                'status': DocumentEventsEnum.NOTIFY_FAILURE.value,
-                'error': error,
+                "user_email": user.email,
+                "user_name": user.username,
+                "admin_email": admin.email,
+                "file_name": file_name,
+                "status": DocumentEventsEnum.NOTIFY_FAILURE.value,
+                "error": error,
             }
             logger.info(f"Sending failure notification to {admin.email} for file {file_name}")
             send_notification.send(notification_data)

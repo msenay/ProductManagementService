@@ -14,16 +14,16 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['user_id', 'first_name', 'last_name', 'email', 'username', 'password']
-        extra_kwargs = {'password': {'write_only': True}, 'user_id': {'read_only': True}}
+        fields = ["user_id", "first_name", "last_name", "email", "username", "password"]
+        extra_kwargs = {"password": {"write_only": True}, "user_id": {"read_only": True}}
 
     def validate(self, data):
         """
         Validate username, email, and password. Ensure they are unique and meet the required conditions.
         """
-        username = data.get('username')
-        email = data.get('email')
-        password = data.get('password')
+        username = data.get("username")
+        email = data.get("email")
+        password = data.get("password")
 
         # Check if username already exists
         if CustomUser.objects.filter(username=username).exists():
@@ -45,15 +45,15 @@ class UserSerializer(serializers.ModelSerializer):
         """
         try:
             user = CustomUser.objects.create_user(
-                username=validated_data['username'],
-                email=validated_data['email'],
-                password=validated_data['password'],
-                first_name=validated_data.get('first_name', ''),
-                last_name=validated_data.get('last_name', '')
+                username=validated_data["username"],
+                email=validated_data["email"],
+                password=validated_data["password"],
+                first_name=validated_data.get("first_name", ""),
+                last_name=validated_data.get("last_name", ""),
             )
             return user
         except Exception as e:
-            logger.error(f"Error creating user", exc_info=e)
+            logger.error("Error creating user", exc_info=e)
             raise serializers.ValidationError("An error occurred while creating the user.")
 
 
@@ -69,9 +69,10 @@ class ProductSerializer(serializers.ModelSerializer):
         model (Product): The model that this serializer handles.
         fields (str): Specifies that all fields in the model should be serialized.
     """
+
     class Meta:
         model = Product
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ProductFilterSerializer(serializers.Serializer):
@@ -94,8 +95,9 @@ class ProductFilterSerializer(serializers.Serializer):
         order (str, optional): Defines the sort order, either ascending ('asc') or descending ('desc').
             Default is 'asc'.
     """
+
     condition = serializers.CharField(required=False, allow_blank=True)
     gender = serializers.CharField(required=False, allow_blank=True)
     brand = serializers.CharField(required=False, allow_blank=True)
-    sort_by = serializers.CharField(required=False, default='title')
-    order = serializers.ChoiceField(choices=['asc', 'desc'], default='asc')
+    sort_by = serializers.CharField(required=False, default="title")
+    order = serializers.ChoiceField(choices=["asc", "desc"], default="asc")

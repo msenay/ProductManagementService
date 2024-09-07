@@ -1,0 +1,6 @@
+#!/bin/bash
+set -ex
+
+cd $(dirname $0)/..
+ruff check backend
+ruff format backend

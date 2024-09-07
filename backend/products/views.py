@@ -14,12 +14,13 @@ from products.core import handle_uploaded_file, notify_admins_for_products, noti
 from products.models import CustomUser, Product
 from products.serializers import UserSerializer, ProductSerializer, ProductFilterSerializer
 
-logger = logging.getLogger('products')
+logger = logging.getLogger("products")
 
 
 # AUTHENTICATION
 
-@api_view(['POST'])
+
+@api_view(["POST"])
 @permission_classes([AllowAny])
 def signup(request) -> Response:
     """
@@ -47,7 +48,7 @@ def signup(request) -> Response:
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
+@api_view(["POST"])
 @permission_classes([AllowAny])
 def login(request) -> Response:
     """
@@ -63,8 +64,8 @@ def login(request) -> Response:
         if login is successful, or an error message with appropriate status codes
         if authentication fails.
     """
-    username: Optional[str] = request.data.get('username')
-    password: Optional[str] = request.data.get('password')
+    username: Optional[str] = request.data.get("username")
+    password: Optional[str] = request.data.get("password")
 
     user: Optional[CustomUser] = authenticate(username=username, password=password)
     if user:
@@ -80,7 +81,7 @@ def login(request) -> Response:
     return Response({"error": "Invalid Password."}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def logout(request) -> Response:
     """
@@ -99,7 +100,7 @@ def logout(request) -> Response:
     return Response({"message": f"User {request.user.username} with an email {request.user.email} logged out successfully"}, status=status.HTTP_200_OK)
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def protected_view(request) -> Response:
     """
@@ -116,7 +117,7 @@ def protected_view(request) -> Response:
     return Response({"message": f"User {request.user.username} with an email {request.user.email} is authenticated."}, status=status.HTTP_200_OK)
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([AllowAny])
 def health_check(request) -> Response:
     """
@@ -133,7 +134,8 @@ def health_check(request) -> Response:
 
 # PRODUCT MANAGEMENT
 
-@api_view(['POST'])
+
+@api_view(["POST"])
 @parser_classes([MultiPartParser, FormParser])
 @permission_classes([IsAuthenticated])
 def upload_products(request) -> Response:
@@ -144,7 +146,7 @@ def upload_products(request) -> Response:
     The XML file is parsed, and each product is saved to the database if it doesn't already exist.
     """
 
-    file = request.FILES.get('file')
+    file = request.FILES.get("file")
     if not file:
         logger.error("No file provided for upload.")
         return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
@@ -163,7 +165,7 @@ def upload_products(request) -> Response:
     return Response({"message": "Products uploaded successfully"}, status=status.HTTP_201_CREATED)
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def list_products(request) -> Response:
     """
@@ -177,23 +179,23 @@ def list_products(request) -> Response:
     products = Product.objects.all()
 
     # Filtering
-    condition = filters.get('condition')
+    condition = filters.get("condition")
     if condition:
         products = products.filter(condition=condition)
 
-    gender = filters.get('gender')
+    gender = filters.get("gender")
     if gender:
         products = products.filter(gender=gender)
 
-    brand = filters.get('brand')
+    brand = filters.get("brand")
     if brand:
         products = products.filter(brand=brand)
 
     # Sorting
-    sort_by = filters.get('sort_by', 'title')
-    order = filters.get('order', 'asc')
-    if order == 'desc':
-        sort_by = f'-{sort_by}'
+    sort_by = filters.get("sort_by", "title")
+    order = filters.get("order", "asc")
+    if order == "desc":
+        sort_by = f"-{sort_by}"
     products = products.order_by(sort_by)
 
     # Pagination
@@ -203,13 +205,13 @@ def list_products(request) -> Response:
 
     # Adding total pages to the response
     response_data = paginator.get_paginated_response(serializer.data).data
-    response_data['total_pages'] = paginator.page.paginator.num_pages
+    response_data["total_pages"] = paginator.page.paginator.num_pages
 
     logger.info(f"Products listed for user {request.user.username}. Filters applied: {filters}")
     return Response(response_data)
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def product_detail(request, product_id: str) -> Response:
     """
@@ -233,20 +235,16 @@ def product_detail(request, product_id: str) -> Response:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def filter_options(request) -> Response:
     """
     Get distinct filter values for condition, gender, and brand.
     Returns distinct values for the condition, gender, and brand fields.
     """
-    conditions: List[str] = Product.objects.values_list('condition', flat=True).distinct()
-    genders: List[str] = Product.objects.values_list('gender', flat=True).distinct()
-    brands: List[str] = Product.objects.values_list('brand', flat=True).distinct()
+    conditions: List[str] = Product.objects.values_list("condition", flat=True).distinct()
+    genders: List[str] = Product.objects.values_list("gender", flat=True).distinct()
+    brands: List[str] = Product.objects.values_list("brand", flat=True).distinct()
 
     logger.info(f"Filter options retrieved for user {request.user.username}.")
-    return Response({
-        'conditions': list(conditions),
-        'genders': list(genders),
-        'brands': list(brands)
-    })
+    return Response({"conditions": list(conditions), "genders": list(genders), "brands": list(brands)})

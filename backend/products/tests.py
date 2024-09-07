@@ -19,13 +19,9 @@ class AuthenticatedTestCase(TestCase):
         self.client = APIClient()
 
         # Create and authenticate a test user
-        self.user = CustomUser.objects.create_user(
-            username="testuser",
-            email="testuser@example.com",
-            password="password123"
-        )
+        self.user = CustomUser.objects.create_user(username="testuser", email="testuser@example.com", password="password123")
         token, created = Token.objects.get_or_create(user=self.user)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
 
     def tearDown(self):
         """
@@ -35,7 +31,6 @@ class AuthenticatedTestCase(TestCase):
 
 
 class UserTests(TestCase):
-
     def setUp(self):
         """
         Set up the test environment before each test.
@@ -51,20 +46,14 @@ class UserTests(TestCase):
         self.client = APIClient()
 
         # Define URLs for the signup, login, logout, protected view, and health check
-        self.signup_url = reverse('signup')
-        self.login_url = reverse('login')
-        self.logout_url = reverse('logout')
-        self.protected_url = reverse('protected')
-        self.health_check_url = reverse('health_check')
+        self.signup_url = reverse("signup")
+        self.login_url = reverse("login")
+        self.logout_url = reverse("logout")
+        self.protected_url = reverse("protected")
+        self.health_check_url = reverse("health_check")
 
         # Define valid user data to use in the tests
-        self.valid_user_data = {
-            "username": "msenay",
-            "email": "murat.senay@example.com",
-            "password": "strongpassword123",
-            "first_name": "Murat",
-            "last_name": "Şenay"
-        }
+        self.valid_user_data = {"username": "msenay", "email": "murat.senay@example.com", "password": "strongpassword123", "first_name": "Murat", "last_name": "Şenay"}
 
     def tearDown(self):
         """
@@ -80,13 +69,13 @@ class UserTests(TestCase):
         credentials and receives a success message with a 201 status code.
         """
         # Send a POST request to the signup endpoint with valid user data
-        response = self.client.post(self.signup_url, self.valid_user_data, format='json')
+        response = self.client.post(self.signup_url, self.valid_user_data, format="json")
 
         # Check that the response status is 201 (Created)
         self.assertEqual(response.status_code, 201)
 
         # Check that the response contains the success message
-        self.assertEqual(response.data['message'], "Signed up successfully!")
+        self.assertEqual(response.data["message"], "Signed up successfully!")
 
     def test_signup_with_short_password(self):
         """
@@ -98,17 +87,17 @@ class UserTests(TestCase):
         """
         # Modify the valid user data to have a short password
         short_password_data = self.valid_user_data.copy()
-        short_password_data['password'] = '123'
+        short_password_data["password"] = "123"
 
         # Send a POST request with the modified data
-        response = self.client.post(self.signup_url, short_password_data, format='json')
+        response = self.client.post(self.signup_url, short_password_data, format="json")
 
         # Check that the response status is 409 (Conflict)
         self.assertEqual(response.status_code, 409)
 
         # Ensure the response contains the error about the short password
         self.assertIn("password", response.data)
-        self.assertEqual(response.data['password'][0], "Password should have a minimum of 4 characters.")
+        self.assertEqual(response.data["password"][0], "Password should have a minimum of 4 characters.")
 
     def test_signup_with_missing_username(self):
         """
@@ -119,10 +108,10 @@ class UserTests(TestCase):
         """
         # Remove the username from the user data
         missing_username_data = self.valid_user_data.copy()
-        del missing_username_data['username']
+        del missing_username_data["username"]
 
         # Send a POST request with the modified data
-        response = self.client.post(self.signup_url, missing_username_data, format='json')
+        response = self.client.post(self.signup_url, missing_username_data, format="json")
 
         # Check that the response status is 409 (Conflict)
         self.assertEqual(response.status_code, 409)
@@ -139,21 +128,21 @@ class UserTests(TestCase):
         error message.
         """
         # First, sign up with the valid user data to create the user
-        self.client.post(self.signup_url, self.valid_user_data, format='json')
+        self.client.post(self.signup_url, self.valid_user_data, format="json")
 
         # Create a new user data dictionary with the same email
         duplicate_email_data = self.valid_user_data.copy()
-        duplicate_email_data['username'] = 'anotheruser'  # Change the username to avoid conflict
+        duplicate_email_data["username"] = "anotheruser"  # Change the username to avoid conflict
 
         # Send a POST request with the duplicate email
-        response = self.client.post(self.signup_url, duplicate_email_data, format='json')
+        response = self.client.post(self.signup_url, duplicate_email_data, format="json")
 
         # Check that the response status is 409 (Conflict)
         self.assertEqual(response.status_code, 409)
 
         # Ensure the response contains the error about the duplicate email
         self.assertIn("email", response.data)
-        self.assertEqual(response.data['email'][0], "user with this email already exists.")
+        self.assertEqual(response.data["email"][0], "user with this email already exists.")
 
     def test_signup_with_duplicate_username(self):
         """
@@ -164,21 +153,21 @@ class UserTests(TestCase):
         error message.
         """
         # First, sign up with the valid user data to create the user
-        self.client.post(self.signup_url, self.valid_user_data, format='json')
+        self.client.post(self.signup_url, self.valid_user_data, format="json")
 
         # Create a new user data dictionary with the same username but different email
         duplicate_username_data = self.valid_user_data.copy()
-        duplicate_username_data['email'] = 'another.email@example.com'  # Change the email to avoid conflict
+        duplicate_username_data["email"] = "another.email@example.com"  # Change the email to avoid conflict
 
         # Send a POST request with the duplicate username
-        response = self.client.post(self.signup_url, duplicate_username_data, format='json')
+        response = self.client.post(self.signup_url, duplicate_username_data, format="json")
 
         # Check that the response status is 409 (Conflict)
         self.assertEqual(response.status_code, 409)
 
         # Ensure the response contains the error about the duplicate username
         self.assertIn("username", response.data)
-        self.assertEqual(response.data['username'][0], "A user with that username already exists.")
+        self.assertEqual(response.data["username"][0], "A user with that username already exists.")
 
     def test_login_with_valid_credentials(self):
         """
@@ -188,22 +177,19 @@ class UserTests(TestCase):
         credentials and receives an authentication token with a 200 status code.
         """
         # First, sign up the user
-        self.client.post(self.signup_url, self.valid_user_data, format='json')
+        self.client.post(self.signup_url, self.valid_user_data, format="json")
 
         # Define login data with the correct credentials
-        login_data = {
-            "username": "msenay",
-            "password": "strongpassword123"
-        }
+        login_data = {"username": "msenay", "password": "strongpassword123"}
 
         # Send a POST request to the login endpoint
-        response = self.client.post(self.login_url, login_data, format='json')
+        response = self.client.post(self.login_url, login_data, format="json")
 
         # Check that the response status is 200 (OK)
         self.assertEqual(response.status_code, 200)
 
         # Ensure the response contains the authentication token
-        self.assertIn('token', response.data)
+        self.assertIn("token", response.data)
 
     def test_login_with_invalid_password(self):
         """
@@ -213,16 +199,13 @@ class UserTests(TestCase):
         results in a 400 status code and the appropriate error message.
         """
         # First, sign up the user
-        self.client.post(self.signup_url, self.valid_user_data, format='json')
+        self.client.post(self.signup_url, self.valid_user_data, format="json")
 
         # Define login data with the wrong password
-        login_data = {
-            "username": "msenay",
-            "password": "wrongpassword"
-        }
+        login_data = {"username": "msenay", "password": "wrongpassword"}
 
         # Send a POST request with invalid credentials
-        response = self.client.post(self.login_url, login_data, format='json')
+        response = self.client.post(self.login_url, login_data, format="json")
 
         # Check that the response status is 400 (Bad Request)
         self.assertEqual(response.status_code, 400)
@@ -240,13 +223,10 @@ class UserTests(TestCase):
         error message.
         """
         # Define login data with a nonexistent username
-        login_data = {
-            "username": "nonexistent",
-            "password": "somepassword"
-        }
+        login_data = {"username": "nonexistent", "password": "somepassword"}
 
         # Send a POST request with the nonexistent username
-        response = self.client.post(self.login_url, login_data, format='json')
+        response = self.client.post(self.login_url, login_data, format="json")
 
         # Check that the response status is 404 (Not Found)
         self.assertEqual(response.status_code, 404)
@@ -276,16 +256,13 @@ class UserTests(TestCase):
         the protected view and receives a 200 status code.
         """
         # First, sign up the user and log in to get a token
-        self.client.post(self.signup_url, self.valid_user_data, format='json')
-        login_data = {
-            "username": "msenay",
-            "password": "strongpassword123"
-        }
-        response = self.client.post(self.login_url, login_data, format='json')
+        self.client.post(self.signup_url, self.valid_user_data, format="json")
+        login_data = {"username": "msenay", "password": "strongpassword123"}
+        response = self.client.post(self.login_url, login_data, format="json")
 
         # Set the token in the headers
-        token = response.data['token']
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+        token = response.data["token"]
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
 
         # Send a GET request to the protected endpoint with the token
         response = self.client.get(self.protected_url)
@@ -301,16 +278,13 @@ class UserTests(TestCase):
         and receives a success message with a 200 status code.
         """
         # Sign up and log in to get the token
-        self.client.post(self.signup_url, self.valid_user_data, format='json')
-        login_data = {
-            "username": "msenay",
-            "password": "strongpassword123"
-        }
-        response = self.client.post(self.login_url, login_data, format='json')
+        self.client.post(self.signup_url, self.valid_user_data, format="json")
+        login_data = {"username": "msenay", "password": "strongpassword123"}
+        response = self.client.post(self.login_url, login_data, format="json")
 
         # Set the token in the headers for authentication
-        token = response.data['token']
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+        token = response.data["token"]
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
 
         # Send a POST request to the logout endpoint
         response = self.client.post(self.logout_url)
@@ -336,11 +310,10 @@ class UserTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Ensure the response contains the status "ok"
-        self.assertEqual(response.data['status'], 'ok')
+        self.assertEqual(response.data["status"], "ok")
 
 
 class ProductUploadTests(AuthenticatedTestCase):
-
     def setUp(self):
         """
         Set up the test environment before each test.
@@ -351,9 +324,9 @@ class ProductUploadTests(AuthenticatedTestCase):
         # Call the parent class's setUp method to initialize the authenticated user
         super().setUp()
         # Reverse resolves the 'upload_products' URL name to its actual URL
-        self.upload_url = reverse('upload_products')
+        self.upload_url = reverse("upload_products")
 
-    @patch('products.views.notify_admins_for_products')
+    @patch("products.views.notify_admins_for_products")
     def test_upload_valid_products(self, mock_notify_admins_for_products):
         """
         Test uploading a valid product XML file.
@@ -361,7 +334,7 @@ class ProductUploadTests(AuthenticatedTestCase):
         This test ensures that a valid XML file can be uploaded and products are created successfully.
         """
         # XML data that represents a valid product
-        xml_data = b'''<?xml version="1.0" encoding="UTF-8"?>
+        xml_data = b"""<?xml version="1.0" encoding="UTF-8"?>
             <rss xmlns:g="http://base.google.com/ns/1.0">
                 <channel>
                     <item>
@@ -391,13 +364,13 @@ class ProductUploadTests(AuthenticatedTestCase):
                         <g:custom_label_4>Label E</g:custom_label_4>
                     </item>
                 </channel>
-            </rss>'''
+            </rss>"""
 
         # Create a file object with the XML data
         file = SimpleUploadedFile("feed.xml", xml_data, content_type="application/xml")
 
         # Send a POST request to upload the file
-        response = self.client.post(self.upload_url, {'file': file}, format='multipart')
+        response = self.client.post(self.upload_url, {"file": file}, format="multipart")
 
         # Assert that the response status code is 201 (Created)
         self.assertEqual(response.status_code, 201)
@@ -406,7 +379,7 @@ class ProductUploadTests(AuthenticatedTestCase):
         self.assertEqual(Product.objects.count(), 1)
 
         # Fetch the created product by its ID
-        created_product = Product.objects.get(id='67890')
+        created_product = Product.objects.get(id="67890")
         self.assertIsNotNone(created_product)
 
         # Verify that each product field is correctly populated
@@ -428,7 +401,7 @@ class ProductUploadTests(AuthenticatedTestCase):
         This test checks that if no file is provided, a 400 status code is returned with an error message.
         """
         # Send a POST request without a file
-        response = self.client.post(self.upload_url, {}, format='multipart')
+        response = self.client.post(self.upload_url, {}, format="multipart")
 
         # Assert that the response status code is 400 (Bad Request)
         self.assertEqual(response.status_code, 400)
@@ -437,7 +410,7 @@ class ProductUploadTests(AuthenticatedTestCase):
         self.assertIn("error", response.data)
         self.assertEqual(response.data["error"], "No file provided")
 
-    @patch('products.views.notify_failure_to_admins')
+    @patch("products.views.notify_failure_to_admins")
     def test_upload_invalid_xml_file(self, mock_notify_failure_to_admins):
         """
         Test uploading an invalid XML file.
@@ -452,7 +425,7 @@ class ProductUploadTests(AuthenticatedTestCase):
         file = SimpleUploadedFile("invalid_feed.xml", invalid_xml_data, content_type="application/xml")
 
         # Send a POST request to upload the invalid file
-        response = self.client.post(self.upload_url, {'file': file}, format='multipart')
+        response = self.client.post(self.upload_url, {"file": file}, format="multipart")
 
         # Assert that the response status code is 400 (Bad Request)
         self.assertEqual(response.status_code, 400)
@@ -466,7 +439,6 @@ class ProductUploadTests(AuthenticatedTestCase):
 
 
 class ProductListTests(AuthenticatedTestCase):
-
     def setUp(self):
         """
         Set up the test environment before each test.
@@ -477,53 +449,133 @@ class ProductListTests(AuthenticatedTestCase):
         # Call the parent class's setUp method to initialize the authenticated user
         super().setUp()
 
-        self.list_products_url = reverse('list_products')
+        self.list_products_url = reverse("list_products")
 
         # Create sample products with all necessary fields
-        Product.objects.bulk_create([
-            Product(
-                id="1", title="Product A", product_type="Type1", link="http://example.com/a",
-                description="Description A", image_link="http://example.com/a.jpg", price=10.0,
-                finalprice=10.0, availability="in stock", google_product_category="Category1",
-                brand="BrandX", gtin="111111", item_group_id="001", condition="new", age_group="adult",
-                color="red", gender="unisex", quantity=100
-            ),
-            Product(
-                id="2", title="Product B", product_type="Type2", link="http://example.com/b",
-                description="Description B", image_link="http://example.com/b.jpg", price=20.0,
-                finalprice=18.0, availability="preorder", google_product_category="Category2",
-                brand="BrandY", gtin="222222", item_group_id="002", condition="used", age_group="adult",
-                color="blue", gender="male", quantity=50
-            ),
-            Product(
-                id="3", title="Product C", product_type="Type1", link="http://example.com/c",
-                description="Description C", image_link="http://example.com/c.jpg", price=30.0,
-                finalprice=28.0, availability="out of stock", google_product_category="Category3",
-                brand="BrandX", gtin="333333", item_group_id="003", condition="new", age_group="adult",
-                color="green", gender="female", quantity=25
-            ),
-            Product(
-                id="4", title="Product D", product_type="Type2", link="http://example.com/d",
-                description="Description D", image_link="http://example.com/d.jpg", price=40.0,
-                finalprice=38.0, availability="in stock", google_product_category="Category1",
-                brand="BrandY", gtin="444444", item_group_id="004", condition="new", age_group="teen",
-                color="black", gender="unisex", quantity=10
-            ),
-            Product(
-                id="5", title="Product E", product_type="Type1", link="http://example.com/e",
-                description="Description E", image_link="http://example.com/e.jpg", price=50.0,
-                finalprice=45.0, availability="preorder", google_product_category="Category2",
-                brand="BrandZ", gtin="555555", item_group_id="005", condition="used", age_group="teen",
-                color="yellow", gender="female", quantity=5
-            ),
-            Product(
-                id="6", title="Product F", product_type="Type2", link="http://example.com/f",
-                description="Description F", image_link="http://example.com/f.jpg", price=60.0,
-                finalprice=55.0, availability="in stock", google_product_category="Category3",
-                brand="BrandX", gtin="666666", item_group_id="006", condition="new", age_group="adult",
-                color="purple", gender="male", quantity=200
-            )
-        ])
+        Product.objects.bulk_create(
+            [
+                Product(
+                    id="1",
+                    title="Product A",
+                    product_type="Type1",
+                    link="http://example.com/a",
+                    description="Description A",
+                    image_link="http://example.com/a.jpg",
+                    price=10.0,
+                    finalprice=10.0,
+                    availability="in stock",
+                    google_product_category="Category1",
+                    brand="BrandX",
+                    gtin="111111",
+                    item_group_id="001",
+                    condition="new",
+                    age_group="adult",
+                    color="red",
+                    gender="unisex",
+                    quantity=100,
+                ),
+                Product(
+                    id="2",
+                    title="Product B",
+                    product_type="Type2",
+                    link="http://example.com/b",
+                    description="Description B",
+                    image_link="http://example.com/b.jpg",
+                    price=20.0,
+                    finalprice=18.0,
+                    availability="preorder",
+                    google_product_category="Category2",
+                    brand="BrandY",
+                    gtin="222222",
+                    item_group_id="002",
+                    condition="used",
+                    age_group="adult",
+                    color="blue",
+                    gender="male",
+                    quantity=50,
+                ),
+                Product(
+                    id="3",
+                    title="Product C",
+                    product_type="Type1",
+                    link="http://example.com/c",
+                    description="Description C",
+                    image_link="http://example.com/c.jpg",
+                    price=30.0,
+                    finalprice=28.0,
+                    availability="out of stock",
+                    google_product_category="Category3",
+                    brand="BrandX",
+                    gtin="333333",
+                    item_group_id="003",
+                    condition="new",
+                    age_group="adult",
+                    color="green",
+                    gender="female",
+                    quantity=25,
+                ),
+                Product(
+                    id="4",
+                    title="Product D",
+                    product_type="Type2",
+                    link="http://example.com/d",
+                    description="Description D",
+                    image_link="http://example.com/d.jpg",
+                    price=40.0,
+                    finalprice=38.0,
+                    availability="in stock",
+                    google_product_category="Category1",
+                    brand="BrandY",
+                    gtin="444444",
+                    item_group_id="004",
+                    condition="new",
+                    age_group="teen",
+                    color="black",
+                    gender="unisex",
+                    quantity=10,
+                ),
+                Product(
+                    id="5",
+                    title="Product E",
+                    product_type="Type1",
+                    link="http://example.com/e",
+                    description="Description E",
+                    image_link="http://example.com/e.jpg",
+                    price=50.0,
+                    finalprice=45.0,
+                    availability="preorder",
+                    google_product_category="Category2",
+                    brand="BrandZ",
+                    gtin="555555",
+                    item_group_id="005",
+                    condition="used",
+                    age_group="teen",
+                    color="yellow",
+                    gender="female",
+                    quantity=5,
+                ),
+                Product(
+                    id="6",
+                    title="Product F",
+                    product_type="Type2",
+                    link="http://example.com/f",
+                    description="Description F",
+                    image_link="http://example.com/f.jpg",
+                    price=60.0,
+                    finalprice=55.0,
+                    availability="in stock",
+                    google_product_category="Category3",
+                    brand="BrandX",
+                    gtin="666666",
+                    item_group_id="006",
+                    condition="new",
+                    age_group="adult",
+                    color="purple",
+                    gender="male",
+                    quantity=200,
+                ),
+            ]
+        )
 
     def test_list_products_pagination(self):
         """
@@ -531,14 +583,14 @@ class ProductListTests(AuthenticatedTestCase):
 
         This test ensures that the product list is paginated correctly with 5 products per page.
         """
-        response = self.client.get(self.list_products_url, {'page': 1})
+        response = self.client.get(self.list_products_url, {"page": 1})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data['results']), 5)  # Check that 5 products are returned on the first page
+        self.assertEqual(len(response.data["results"]), 5)  # Check that 5 products are returned on the first page
 
         # Test second page
-        response = self.client.get(self.list_products_url, {'page': 2})
+        response = self.client.get(self.list_products_url, {"page": 2})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data['results']), 1)  # Only one product should be on the second page
+        self.assertEqual(len(response.data["results"]), 1)  # Only one product should be on the second page
 
     def test_list_products_filtering(self):
         """
@@ -547,19 +599,19 @@ class ProductListTests(AuthenticatedTestCase):
         This test ensures that products can be filtered by condition, gender, and brand.
         """
         # Filter by condition "new"
-        response = self.client.get(self.list_products_url, {'condition': 'new'})
+        response = self.client.get(self.list_products_url, {"condition": "new"})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data['results']), 4)
+        self.assertEqual(len(response.data["results"]), 4)
 
         # Filter by gender "female"
-        response = self.client.get(self.list_products_url, {'gender': 'female'})
+        response = self.client.get(self.list_products_url, {"gender": "female"})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data['results']), 2)
+        self.assertEqual(len(response.data["results"]), 2)
 
         # Filter by brand "BrandX"
-        response = self.client.get(self.list_products_url, {'brand': 'BrandX'})
+        response = self.client.get(self.list_products_url, {"brand": "BrandX"})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data['results']), 3)
+        self.assertEqual(len(response.data["results"]), 3)
 
     def test_list_products_sorting(self):
         """
@@ -568,28 +620,27 @@ class ProductListTests(AuthenticatedTestCase):
         This test ensures that products can be sorted by price and title in ascending and descending order.
         """
         # Sort by price ascending
-        response = self.client.get(self.list_products_url, {'sort_by': 'price', 'order': 'asc'})
+        response = self.client.get(self.list_products_url, {"sort_by": "price", "order": "asc"})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['results'][0]['title'], "Product A")  # Lowest price should be first
+        self.assertEqual(response.data["results"][0]["title"], "Product A")  # Lowest price should be first
 
         # Sort by price descending
-        response = self.client.get(self.list_products_url, {'sort_by': 'price', 'order': 'desc'})
+        response = self.client.get(self.list_products_url, {"sort_by": "price", "order": "desc"})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['results'][0]['title'], "Product F")  # Highest price should be first
+        self.assertEqual(response.data["results"][0]["title"], "Product F")  # Highest price should be first
 
         # Sort by title ascending
-        response = self.client.get(self.list_products_url, {'sort_by': 'title', 'order': 'asc'})
+        response = self.client.get(self.list_products_url, {"sort_by": "title", "order": "asc"})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['results'][0]['title'], "Product A")  # Alphabetically first
+        self.assertEqual(response.data["results"][0]["title"], "Product A")  # Alphabetically first
 
         # Sort by title descending
-        response = self.client.get(self.list_products_url, {'sort_by': 'title', 'order': 'desc'})
+        response = self.client.get(self.list_products_url, {"sort_by": "title", "order": "desc"})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['results'][0]['title'], "Product F")  # Alphabetically last
+        self.assertEqual(response.data["results"][0]["title"], "Product F")  # Alphabetically last
 
 
 class ProductDetailTests(AuthenticatedTestCase):
-
     def setUp(self):
         """
         Set up the test environment before each test.
@@ -599,15 +650,28 @@ class ProductDetailTests(AuthenticatedTestCase):
         """
         # Call the parent class's setUp method to initialize the authenticated user
         super().setUp()
-        self.product_detail_url = reverse('product_detail', kwargs={'product_id': '1'})
+        self.product_detail_url = reverse("product_detail", kwargs={"product_id": "1"})
 
         # Create a sample product
         self.product = Product.objects.create(
-            id="1", title="Product A", product_type="Type1", link="http://example.com/a",
-            description="Description A", image_link="http://example.com/a.jpg", price=10.0,
-            finalprice=10.0, availability="in stock", google_product_category="Category1",
-            brand="BrandX", gtin="111111", item_group_id="001", condition="new", age_group="adult",
-            color="red", gender="unisex", quantity=100
+            id="1",
+            title="Product A",
+            product_type="Type1",
+            link="http://example.com/a",
+            description="Description A",
+            image_link="http://example.com/a.jpg",
+            price=10.0,
+            finalprice=10.0,
+            availability="in stock",
+            google_product_category="Category1",
+            brand="BrandX",
+            gtin="111111",
+            item_group_id="001",
+            condition="new",
+            age_group="adult",
+            color="red",
+            gender="unisex",
+            quantity=100,
         )
 
     def test_product_detail_success(self):
@@ -619,9 +683,9 @@ class ProductDetailTests(AuthenticatedTestCase):
         """
         response = self.client.get(self.product_detail_url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['id'], self.product.id)
-        self.assertEqual(response.data['title'], self.product.title)
-        self.assertEqual(response.data['price'], f"{self.product.price:.2f}")
+        self.assertEqual(response.data["id"], self.product.id)
+        self.assertEqual(response.data["title"], self.product.title)
+        self.assertEqual(response.data["price"], f"{self.product.price:.2f}")
 
     def test_product_detail_not_found(self):
         """
@@ -630,10 +694,10 @@ class ProductDetailTests(AuthenticatedTestCase):
         This test ensures that attempting to retrieve a non-existing product
         returns a 404 status code with an appropriate error message.
         """
-        non_existent_product_url = reverse('product_detail', kwargs={'product_id': '9999'})
+        non_existent_product_url = reverse("product_detail", kwargs={"product_id": "9999"})
         response = self.client.get(non_existent_product_url)
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.data['error'], "Product not found.")
+        self.assertEqual(response.data["error"], "Product not found.")
 
     def test_product_detail_error(self):
         """
@@ -642,7 +706,7 @@ class ProductDetailTests(AuthenticatedTestCase):
         This test verifies that if an unexpected error occurs, a 400 status
         code is returned and an error message is logged.
         """
-        with patch('products.views.Product.objects.get') as mock_get:
+        with patch("products.views.Product.objects.get") as mock_get:
             mock_get.side_effect = Exception("Unexpected Error")
             response = self.client.get(self.product_detail_url)
 
@@ -661,41 +725,80 @@ class ProductFilterTests(AuthenticatedTestCase):
 
         # Create sample products with all necessary fields
         Product.objects.create(
-            id="1", title="Product A", product_type="Type1", link="http://example.com/a",
-            description="Description A", image_link="http://example.com/a.jpg", price=10.0,
-            finalprice=10.0, availability="in stock", google_product_category="Category1",
-            brand="BrandX", gtin="111111", item_group_id="001", condition="new",
-            age_group="adult", color="red", gender="unisex", quantity=100
+            id="1",
+            title="Product A",
+            product_type="Type1",
+            link="http://example.com/a",
+            description="Description A",
+            image_link="http://example.com/a.jpg",
+            price=10.0,
+            finalprice=10.0,
+            availability="in stock",
+            google_product_category="Category1",
+            brand="BrandX",
+            gtin="111111",
+            item_group_id="001",
+            condition="new",
+            age_group="adult",
+            color="red",
+            gender="unisex",
+            quantity=100,
         )
         Product.objects.create(
-            id="2", title="Product B", product_type="Type2", link="http://example.com/b",
-            description="Description B", image_link="http://example.com/b.jpg", price=20.0,
-            finalprice=18.0, availability="preorder", google_product_category="Category2",
-            brand="BrandY", gtin="222222", item_group_id="002", condition="used",
-            age_group="adult", color="blue", gender="male", quantity=50
+            id="2",
+            title="Product B",
+            product_type="Type2",
+            link="http://example.com/b",
+            description="Description B",
+            image_link="http://example.com/b.jpg",
+            price=20.0,
+            finalprice=18.0,
+            availability="preorder",
+            google_product_category="Category2",
+            brand="BrandY",
+            gtin="222222",
+            item_group_id="002",
+            condition="used",
+            age_group="adult",
+            color="blue",
+            gender="male",
+            quantity=50,
         )
         Product.objects.create(
-            id="3", title="Product C", product_type="Type3", link="http://example.com/c",
-            description="Description C", image_link="http://example.com/c.jpg", price=30.0,
-            finalprice=28.0, availability="out of stock", google_product_category="Category3",
-            brand="BrandZ", gtin="333333", item_group_id="003", condition="new",
-            age_group="adult", color="green", gender="female", quantity=25
+            id="3",
+            title="Product C",
+            product_type="Type3",
+            link="http://example.com/c",
+            description="Description C",
+            image_link="http://example.com/c.jpg",
+            price=30.0,
+            finalprice=28.0,
+            availability="out of stock",
+            google_product_category="Category3",
+            brand="BrandZ",
+            gtin="333333",
+            item_group_id="003",
+            condition="new",
+            age_group="adult",
+            color="green",
+            gender="female",
+            quantity=25,
         )
 
     def test_filter_options(self):
         """
         Test to ensure that the product filters return distinct values for condition, gender, and brand.
         """
-        url = reverse('filter_options')
+        url = reverse("filter_options")
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
         # Extract the returned filter values
-        conditions = response.data['conditions']
-        genders = response.data['genders']
-        brands = response.data['brands']
+        conditions = response.data["conditions"]
+        genders = response.data["genders"]
+        brands = response.data["brands"]
 
         # Assert that the correct distinct values are returned
-        self.assertCountEqual(conditions, ['new', 'used'])
-        self.assertCountEqual(genders, ['unisex', 'male', 'female'])
-        self.assertCountEqual(brands, ['BrandX', 'BrandY', 'BrandZ'])
+        self.assertCountEqual(conditions, ["new", "used"])
+        self.assertCountEqual(genders, ["unisex", "male", "female"])
+        self.assertCountEqual(brands, ["BrandX", "BrandY", "BrandZ"])

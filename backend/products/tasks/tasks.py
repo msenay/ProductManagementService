@@ -1,1 +1,1 @@
-from .product import * # noqa: F403
+from .product import *  # noqa: F403
