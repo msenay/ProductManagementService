@@ -11,11 +11,11 @@ class UserSerializer(serializers.ModelSerializer):
     that the password meets the minimum length requirement and excludes the
     user_id field from being modified by the client.
     """
+
     class Meta:
         model = CustomUser
         fields = ['user_id', 'first_name', 'last_name', 'email', 'username', 'password']
         extra_kwargs = {'password': {'write_only': True}, 'user_id': {'read_only': True}}
-
 
     def validate(self, data):
         """
@@ -58,6 +58,44 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Product model.
+
+    This serializer converts Product model instances into JSON format
+    and handles the deserialization from JSON to Product model instances
+    when creating or updating records. It includes all fields of the Product model.
+
+    Attributes:
+        model (Product): The model that this serializer handles.
+        fields (str): Specifies that all fields in the model should be serialized.
+    """
     class Meta:
         model = Product
         fields = '__all__'
+
+
+class ProductFilterSerializer(serializers.Serializer):
+    """
+    Serializer for product filtering parameters.
+
+    This serializer validates and processes filtering parameters
+    that are passed in the query string for filtering the list of products.
+    It checks for valid conditions, gender, brand, sorting, and order values.
+
+    Fields:
+        condition (str, optional): Filter products by condition (e.g., 'new', 'used').
+            It's optional and can be blank.
+        gender (str, optional): Filter products by gender (e.g., 'male', 'female').
+            It's optional and can be blank.
+        brand (str, optional): Filter products by brand name.
+            It's optional and can be blank.
+        sort_by (str, optional): Defines the field by which the results will be sorted.
+            Default is 'title'.
+        order (str, optional): Defines the sort order, either ascending ('asc') or descending ('desc').
+            Default is 'asc'.
+    """
+    condition = serializers.CharField(required=False, allow_blank=True)
+    gender = serializers.CharField(required=False, allow_blank=True)
+    brand = serializers.CharField(required=False, allow_blank=True)
+    sort_by = serializers.CharField(required=False, default='title')
+    order = serializers.ChoiceField(choices=['asc', 'desc'], default='asc')

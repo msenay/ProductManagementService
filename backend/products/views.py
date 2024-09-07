@@ -1,4 +1,5 @@
 import logging
+from typing import List, Optional
 
 from django.contrib.auth import authenticate
 from rest_framework.decorators import api_view, permission_classes, parser_classes
@@ -11,7 +12,7 @@ from rest_framework.authtoken.models import Token
 from products.enums import ProductPagination
 from products.core import handle_uploaded_file, notify_admins_for_products, notify_failure_to_admins
 from products.models import CustomUser, Product
-from products.serializers import UserSerializer, ProductSerializer
+from products.serializers import UserSerializer, ProductSerializer, ProductFilterSerializer
 
 logger = logging.getLogger('products')
 
@@ -20,7 +21,7 @@ logger = logging.getLogger('products')
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def signup(request):
+def signup(request) -> Response:
     """
     User signup endpoint.
 
@@ -38,16 +39,17 @@ def signup(request):
     try:
         if serializer.is_valid(raise_exception=True):
             serializer.save()
+            logger.info(f"New user signed up: {serializer.data.get('username')}")
             return Response({"message": "Signed up successfully!"}, status=status.HTTP_201_CREATED)
     except serializers.ValidationError as e:
+        logger.warning("Signup failed.", exc_info=e)
         return Response(e.detail, status=status.HTTP_409_CONFLICT)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# views.py
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def login(request):
+def login(request) -> Response:
     """
     User login endpoint.
 
@@ -61,22 +63,26 @@ def login(request):
         if login is successful, or an error message with appropriate status codes
         if authentication fails.
     """
-    username = request.data.get('username')
-    password = request.data.get('password')
-    user = authenticate(username=username, password=password)
-    if user is not None:
+    username: Optional[str] = request.data.get('username')
+    password: Optional[str] = request.data.get('password')
+
+    user: Optional[CustomUser] = authenticate(username=username, password=password)
+    if user:
         token, _ = Token.objects.get_or_create(user=user)
+        logger.info(f"User {username} logged in.")
         return Response({"token": token.key, "username": username}, status=status.HTTP_200_OK)
 
     if not CustomUser.objects.filter(username=username).exists():
+        logger.error(f"Login failed: User {username} not found.")
         return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
+    logger.warning(f"Login failed: Invalid password for user {username}.")
     return Response({"error": "Invalid Password."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def logout(request):
+def logout(request) -> Response:
     """
     User logout endpoint.
 
@@ -89,12 +95,13 @@ def logout(request):
         logout is successful.
     """
     request.user.auth_token.delete()
+    logger.info(f"User {request.user.username} logged out successfully.")
     return Response({"message": f"User {request.user.username} with an email {request.user.email} logged out successfully"}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def protected_view(request):
+def protected_view(request) -> Response:
     """
     Protected view endpoint.
 
@@ -105,12 +112,13 @@ def protected_view(request):
         Response: JSON response with a success message and status code 200 if
         the user is authenticated.
     """
+    logger.info(f"Protected view accessed by {request.user.username}.")
     return Response({"message": f"User {request.user.username} with an email {request.user.email} is authenticated."}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def health_check(request):
+def health_check(request) -> Response:
     """
     Health check endpoint.
 
@@ -128,7 +136,7 @@ def health_check(request):
 @api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])
 @permission_classes([IsAuthenticated])
-def upload_products(request):
+def upload_products(request) -> Response:
     """
     Upload products via an XML file.
 
@@ -138,6 +146,7 @@ def upload_products(request):
 
     file = request.FILES.get('file')
     if not file:
+        logger.error("No file provided for upload.")
         return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
 
     all_admins = CustomUser.objects.filter(is_superuser=True, is_staff=True)
@@ -145,6 +154,7 @@ def upload_products(request):
     try:
         existing_product_ids, problematic_product_ids, products = handle_uploaded_file(file)
         notify_admins_for_products(request.user, file.name, products, existing_product_ids, problematic_product_ids, all_admins)
+        logger.info(f"Products uploaded successfully by {request.user.username}: {file.name}")
     except Exception as e:
         logger.error(f"Error uploading file {file.name}", exc_info=e)
         notify_failure_to_admins(request.user, file.name, str(e), all_admins)
@@ -153,31 +163,35 @@ def upload_products(request):
     return Response({"message": "Products uploaded successfully"}, status=status.HTTP_201_CREATED)
 
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def list_products(request):
+def list_products(request) -> Response:
     """
     List products with pagination, filtering, and sorting.
     """
+    # Validate and parse query parameters
+    serializer = ProductFilterSerializer(data=request.GET)
+    serializer.is_valid(raise_exception=True)
+    filters = serializer.validated_data
+
     products = Product.objects.all()
 
     # Filtering
-    condition = request.GET.get('condition')
+    condition = filters.get('condition')
     if condition:
         products = products.filter(condition=condition)
 
-    gender = request.GET.get('gender')
+    gender = filters.get('gender')
     if gender:
         products = products.filter(gender=gender)
 
-    brand = request.GET.get('brand')
+    brand = filters.get('brand')
     if brand:
         products = products.filter(brand=brand)
 
     # Sorting
-    sort_by = request.GET.get('sort_by', 'title')
-    order = request.GET.get('order', 'asc')
+    sort_by = filters.get('sort_by', 'title')
+    order = filters.get('order', 'asc')
     if order == 'desc':
         sort_by = f'-{sort_by}'
     products = products.order_by(sort_by)
@@ -191,12 +205,13 @@ def list_products(request):
     response_data = paginator.get_paginated_response(serializer.data).data
     response_data['total_pages'] = paginator.page.paginator.num_pages
 
+    logger.info(f"Products listed for user {request.user.username}. Filters applied: {filters}")
     return Response(response_data)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def product_detail(request, product_id):
+def product_detail(request, product_id: str) -> Response:
     """
     Retrieve details of a single product by ID.
 
@@ -208,9 +223,10 @@ def product_detail(request, product_id):
     try:
         product = Product.objects.get(id=product_id)
         serializer = ProductSerializer(product)
+        logger.info(f"Product {product_id} details retrieved for user {request.user.username}.")
         return Response(serializer.data)
     except Product.DoesNotExist:
-        logger.error(f"Product with ID {product_id} not found.")
+        logger.error(f"Product with ID {product_id} not found.", exc_info=True)
         return Response({"error": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         logger.error(f"Error retrieving product with ID {product_id}: {e}")
@@ -219,15 +235,16 @@ def product_detail(request, product_id):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def filter_options(request):
+def filter_options(request) -> Response:
     """
     Get distinct filter values for condition, gender, and brand.
     Returns distinct values for the condition, gender, and brand fields.
     """
-    conditions = Product.objects.values_list('condition', flat=True).distinct()
-    genders = Product.objects.values_list('gender', flat=True).distinct()
-    brands = Product.objects.values_list('brand', flat=True).distinct()
+    conditions: List[str] = Product.objects.values_list('condition', flat=True).distinct()
+    genders: List[str] = Product.objects.values_list('gender', flat=True).distinct()
+    brands: List[str] = Product.objects.values_list('brand', flat=True).distinct()
 
+    logger.info(f"Filter options retrieved for user {request.user.username}.")
     return Response({
         'conditions': list(conditions),
         'genders': list(genders),

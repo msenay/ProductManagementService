@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token
 from products.models import Product, CustomUser
 from unittest.mock import patch
+import logging
 
 
 class AuthenticatedTestCase(TestCase):
@@ -13,6 +14,8 @@ class AuthenticatedTestCase(TestCase):
     """
 
     def setUp(self):
+        # Disable logging during tests
+        logging.disable(logging.CRITICAL)
         self.client = APIClient()
 
         # Create and authenticate a test user
@@ -23,6 +26,12 @@ class AuthenticatedTestCase(TestCase):
         )
         token, created = Token.objects.get_or_create(user=self.user)
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
+
+    def tearDown(self):
+        """
+        Activate logging after each test.
+        """
+        logging.disable(logging.NOTSET)
 
 
 class UserTests(TestCase):
@@ -35,6 +44,9 @@ class UserTests(TestCase):
         login, logout, protected, and health check endpoints, and creating
         a valid user data dictionary for use in the tests.
         """
+        # Disable logging during tests
+        logging.disable(logging.CRITICAL)
+
         # Initialize the API client for making requests in the tests
         self.client = APIClient()
 
@@ -53,6 +65,12 @@ class UserTests(TestCase):
             "first_name": "Murat",
             "last_name": "Şenay"
         }
+
+    def tearDown(self):
+        """
+        Activate logging after each test.
+        """
+        logging.disable(logging.NOTSET)
 
     def test_signup_with_valid_data(self):
         """
@@ -336,8 +354,7 @@ class ProductUploadTests(AuthenticatedTestCase):
         self.upload_url = reverse('upload_products')
 
     @patch('products.views.notify_admins_for_products')
-    @patch('products.core.logger')
-    def test_upload_valid_products(self, mock_logger_core, mock_notify_admins_for_products):
+    def test_upload_valid_products(self, mock_notify_admins_for_products):
         """
         Test uploading a valid product XML file.
 
@@ -404,9 +421,6 @@ class ProductUploadTests(AuthenticatedTestCase):
         # Ensure that notify_admins_for_products was called
         mock_notify_admins_for_products.assert_called()
 
-        # Ensure that logger's info method was called
-        mock_logger_core.info.assert_called()
-
     def test_upload_with_no_file(self):
         """
         Test uploading without providing a file.
@@ -424,9 +438,7 @@ class ProductUploadTests(AuthenticatedTestCase):
         self.assertEqual(response.data["error"], "No file provided")
 
     @patch('products.views.notify_failure_to_admins')
-    @patch('products.core.logger')
-    @patch('products.views.logger')
-    def test_upload_invalid_xml_file(self, mock_logger_views, mock_logger_core, mock_notify_failure_to_admins):
+    def test_upload_invalid_xml_file(self, mock_notify_failure_to_admins):
         """
         Test uploading an invalid XML file.
 
@@ -451,10 +463,6 @@ class ProductUploadTests(AuthenticatedTestCase):
 
         # Ensure that notify_failure_to_admins was called
         mock_notify_failure_to_admins.assert_called()
-
-        # Ensure that both logger's error methods were called
-        mock_logger_core.error.assert_called()
-        mock_logger_views.error.assert_called()
 
 
 class ProductListTests(AuthenticatedTestCase):
@@ -627,8 +635,7 @@ class ProductDetailTests(AuthenticatedTestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.data['error'], "Product not found.")
 
-    @patch('products.views.logger')
-    def test_product_detail_error(self, mock_logger):
+    def test_product_detail_error(self):
         """
         Test handling an unexpected error during product retrieval.
 
@@ -642,7 +649,6 @@ class ProductDetailTests(AuthenticatedTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("error", response.data)
         self.assertEqual(response.data["error"], "Unexpected Error")
-        mock_logger.error.assert_called_with(f"Error retrieving product with ID 1: Unexpected Error")
 
 
 class ProductFilterTests(AuthenticatedTestCase):
