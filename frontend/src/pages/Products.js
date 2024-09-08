@@ -129,21 +129,21 @@ const Products = () => {
                         <>
                             <h2>Filter Products</h2>
                             <form>
-                                <select name="condition" value={filters.condition} onChange={handleFilterChange}>
+                                <select name="condition" value={filters.condition} onChange={handleFilterChange} aria-label="Condition">
                                     {filterOptions.conditions.map((condition) => (
                                         <option key={condition} value={condition}>
                                             {condition}
                                         </option>
                                     ))}
                                 </select>
-                                <select name="gender" value={filters.gender} onChange={handleFilterChange}>
+                                <select name="gender" value={filters.gender} onChange={handleFilterChange} aria-label="Gender">
                                     {filterOptions.genders.map((gender) => (
                                         <option key={gender} value={gender}>
                                             {gender}
                                         </option>
                                     ))}
                                 </select>
-                                <select name="brand" value={filters.brand} onChange={handleFilterChange}>
+                                <select name="brand" value={filters.brand} onChange={handleFilterChange} aria-label="Brand">
                                     {filterOptions.brands.map((brand) => (
                                         <option key={brand} value={brand}>
                                             {brand}
