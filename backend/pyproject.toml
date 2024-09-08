@@ -1,0 +1,12 @@
+[tool.ruff]
+line-length = 180
+lint.select = ["E", "F", "W", "C", "N"]
+lint.ignore = ["E501"]
+exclude = ["migrations", "products.tests"]
+
+[tool.ruff.lint.per-file-ignores]
+
+[tool.mypy]
+ignore_missing_imports = true
+disable_error_code = ["attr-defined"]
+
