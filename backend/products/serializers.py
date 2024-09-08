@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from products.models import CustomUser, Product
-from tasks.product import logger
+import logging
 
+logger = logging.getLogger(__name__)
 
 class UserSerializer(serializers.ModelSerializer):
     """

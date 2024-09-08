@@ -136,3 +136,18 @@ Use the imported requests to test the backend APIs.
 ```bash
 docker-compose run api python manage.py test
 ```
+
+### Code Linting and Type Checking in the Project
+In this project, we are using two key tools to ensure code quality and maintainability:
+
+<b style="color:red;">Ruff</b>: A linter focused on enforcing code standards (PEP8) and maintaining clean, readable code. It checks the project for issues such as unused imports, inconsistent indentation, and other common Python issues. Ruff is particularly fast and is a great alternative to Flake8 or pylint.
+
+<b style="color:red;">Mypy</b>: A static type checker that verifies that the types in the code are consistent with the type annotations. Mypy ensures that the code conforms to the specified types, which reduces bugs and makes the code more predictable and easier to maintain.
+
+##### Why They Are Added to [run_api](run_api) ❔
+
+The [run_api](run_api) script, which is executed as part of the [Docker Compose](../docker-compose.yml) setup, includes both ruff and mypy checks to ensure that every deployment maintains high-quality code standards. Adding these checks during the deployment process helps catch potential issues early.
+
+Mypy is included to ensure that any type errors are caught before the application starts, reducing the risk of type-related runtime errors.
+Ruff ensures the code adheres to Python's style guide, making it easier to maintain and review.
+By incorporating these tools into the script, we automate the code quality checks, ensuring a clean codebase for every deployment.

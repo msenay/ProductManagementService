@@ -178,6 +178,12 @@ def list_products(request) -> Response:
 
     products = Product.objects.all()
 
+    if not products.exists():
+        return Response({
+            "results": [],
+            "total_pages": 0
+        })
+
     # Filtering
     condition = filters.get("condition")
     if condition:
@@ -201,11 +207,17 @@ def list_products(request) -> Response:
     # Pagination
     paginator = ProductPagination()
     paginated_products = paginator.paginate_queryset(products, request)
-    serializer = ProductSerializer(paginated_products, many=True)
+
+    # Product serializer for paginated products
+    product_serializer = ProductSerializer(paginated_products, many=True)
 
     # Adding total pages to the response
-    response_data = paginator.get_paginated_response(serializer.data).data
-    response_data["total_pages"] = paginator.page.paginator.num_pages
+    response_data = paginator.get_paginated_response(product_serializer.data).data
+
+    if paginator.page is not None:
+        response_data["total_pages"] = paginator.page.paginator.num_pages
+    else:
+        response_data["total_pages"] = 0
 
     logger.info(f"Products listed for user {request.user.username}. Filters applied: {filters}")
     return Response(response_data)

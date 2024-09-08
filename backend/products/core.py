@@ -7,6 +7,7 @@ from products.enums import DocumentEventsEnum
 from products.models import Product, CustomUser
 from products.tasks.product import send_notification
 from products.serializers import ProductSerializer
+from products.utils import get_text, get_float_text, get_attribute
 
 logger = logging.getLogger(__name__)
 
@@ -38,9 +39,9 @@ def handle_uploaded_file(file) -> Tuple[List[str], List[str], List[Dict]]:
     product_instances_list: List[Dict] = []
 
     for item in root.findall("./channel/item"):
-        product_id: str = item.find("g:id", namespace).text
+        product_id: Optional[str] = get_text(item.find("g:id", namespace), None)
 
-        if Product.objects.filter(id=product_id).exists():
+        if product_id and Product.objects.filter(id=product_id).exists():
             existing_product_ids.append(product_id)
             continue
 
@@ -51,7 +52,10 @@ def handle_uploaded_file(file) -> Tuple[List[str], List[str], List[Dict]]:
             logger.info(f"Product with ID {product_id} successfully created.")
         except Exception as e:
             logger.error(f"Failed to create product with {product_id=}", exc_info=e)
-            problematic_product_ids.append(product_id)
+            if product_id:
+                problematic_product_ids.append(product_id)
+            else:
+                logger.error("Product ID not found in XML item.")
 
     return existing_product_ids, problematic_product_ids, product_instances_list
 
@@ -67,28 +71,49 @@ def create_product_instance(item: ET.Element, namespace: Dict[str, str]) -> Prod
     Returns:
         Product: The created Product instance.
     """
-    product_id: str = item.find("g:id", namespace).text
-    title: str = item.find("title").text
-    product_type: str = item.find("g:product_type", namespace).text
-    link: str = item.find("link").text
-    description: str = item.find("description").text
-    image_link: str = item.find("g:image_link", namespace).text
-    price: float = float(item.find("g:price", namespace).text.split()[0])
-    sale_price_text: Optional[str] = item.find("g:sale_price", namespace).text
-    sale_price: Optional[float] = float(sale_price_text.split()[0]) if sale_price_text else None
-    finalprice: float = float(item.find("g:finalprice", namespace).text.split()[0])
-    availability: str = item.find("g:availability", namespace).text
-    google_product_category: str = item.find("g:google_product_category", namespace).text
-    brand: str = item.find("g:brand", namespace).text
-    gtin: str = item.find("g:gtin", namespace).text
-    item_group_id: str = item.find("g:item_group_id", namespace).text
-    condition: str = item.find("g:condition", namespace).text
-    age_group: str = item.find("g:age_group", namespace).text
-    color: str = item.find("g:color", namespace).text
-    gender: str = item.find("g:gender", namespace).text
-    quantity: int = int(item.find("g:quantity", namespace).text)
+    product_id: Optional[str] = get_text(item.find("g:id", namespace), None)
+    title: Optional[str] = get_text(item.find("title"), None)
+    product_type: Optional[str] = get_text(item.find("g:product_type", namespace), None)
+    link: Optional[str] = get_text(item.find("link"), None)
+    description: Optional[str] = get_text(item.find("description"), None)
+    image_link: Optional[str] = get_text(item.find("g:image_link", namespace), None)
+    price: Optional[float] = get_float_text(item.find("g:price", namespace), None)
+    sale_price: Optional[float] = get_float_text(item.find("g:sale_price", namespace), None)
+    old_price: Optional[float] = get_float_text(item.find("g:oldprice", namespace), None)
+    final_price: Optional[float] = get_float_text(item.find("g:finalprice", namespace), None)
+    discount_percent: Optional[str] = get_text(item.find("g:discount_percent", namespace), None)
+    availability: Optional[str] = get_text(item.find("g:availability", namespace), None)
+    google_product_category: Optional[str] = get_text(item.find("g:google_product_category", namespace), None)
+    brand: Optional[str] = get_text(item.find("g:brand", namespace), None)
+    gtin: Optional[str] = get_text(item.find("g:gtin", namespace), None)
+    item_group_id: Optional[str] = get_text(item.find("g:item_group_id", namespace), None)
+    condition: Optional[str] = get_text(item.find("g:condition", namespace), None)
+    age_group: Optional[str] = get_text(item.find("g:age_group", namespace), None)
+    color: Optional[str] = get_text(item.find("g:color", namespace), None)
+    gender: Optional[str] = get_text(item.find("g:gender", namespace), None)
+    quantity: int = int(get_text(item.find("g:quantity", namespace), "0") or "0")
+    adult_str = get_text(item.find("g:adult", namespace), "no")
+    adult: bool = adult_str.lower() == "yes" if adult_str else False
+    adwords_labels: Optional[str] = get_text(item.find("g:adwords_labels", namespace), None)
+    additional_images_count: Optional[int] = int(get_text(item.find("additional_images_count", namespace), "0") or "0")
+    ios_url: Optional[Optional[str]] = get_text(item.find("g:ios_url", namespace), None)
+    ios_app_store_id: Optional[Optional[str]] = get_text(item.find("g:ios_app_store_id", namespace), None)
+    ios_app_name: Optional[Optional[str]] = get_text(item.find("g:ios_app_name", namespace), None)
+    iphone_app_name: Optional[str] = get_attribute(item.find("appLink[@property='iphone_app_name']"), "content", None)
+    iphone_app_store_id: Optional[str] = get_attribute(item.find("appLink[@property='iphone_app_store_id']"), "content", None)
+    iphone_url: Optional[str] = get_attribute(item.find("appLink[@property='iphone_url']"), "content", None)
 
-    custom_labels: List[str] = [item.find(f"g:custom_label_{i}", namespace).text or "" for i in range(5)]
+    android_package: Optional[Optional[str]] = get_text(item.find("g:android_package", namespace), None)
+    android_app_name: Optional[Optional[str]] = get_text(item.find("g:android_app_name", namespace), None)
+    options_percentage: Optional[float] = get_float_text(item.find("options_percentage", namespace), None)
+    icon_media_url: Optional[Optional[str]] = get_text(item.find("icon_media_url", namespace), None)
+    all_sizes_skus: Optional[Optional[str]] = get_text(item.find("all_sizes_skus", namespace), None)
+    sizes_of_all_skus: Optional[Optional[str]] = get_text(item.find("sizes_of_all_skus", namespace), None)
+    product_season: Optional[Optional[str]] = get_text(item.find("product_season", namespace), None)
+    product_class: Optional[Optional[str]] = get_text(item.find("product_class", namespace), None)
+    gender_orig_value: Optional[str] = get_text(item.find("g:gender_orig_value", namespace), None)
+
+    custom_labels: List[Optional[str]] = [get_text(item.find(f"g:custom_label_{i}", namespace), None) for i in range(5)]
 
     product_instance: Product = Product.objects.create(
         id=product_id,
@@ -99,7 +124,9 @@ def create_product_instance(item: ET.Element, namespace: Dict[str, str]) -> Prod
         image_link=image_link,
         price=price,
         sale_price=sale_price,
-        finalprice=finalprice,
+        old_price=old_price,
+        final_price=final_price,
+        discount_percent=discount_percent,
         availability=availability,
         google_product_category=google_product_category,
         brand=brand,
@@ -109,19 +136,37 @@ def create_product_instance(item: ET.Element, namespace: Dict[str, str]) -> Prod
         age_group=age_group,
         color=color,
         gender=gender,
+        gender_orig_value=gender_orig_value,
         quantity=quantity,
+        adult=adult,
+        adwords_labels=adwords_labels,
+        additional_images_count=additional_images_count,
+        ios_url=ios_url,
+        ios_app_store_id=ios_app_store_id,
+        ios_app_name=ios_app_name,
+        android_package=android_package,
+        android_app_name=android_app_name,
+        options_percentage=options_percentage,
+        icon_media_url=icon_media_url,
+        all_sizes_skus=all_sizes_skus,
+        sizes_of_all_skus=sizes_of_all_skus,
+        product_season=product_season,
+        product_class=product_class,
         custom_label_0=custom_labels[0],
         custom_label_1=custom_labels[1],
         custom_label_2=custom_labels[2],
         custom_label_3=custom_labels[3],
         custom_label_4=custom_labels[4],
+        iphone_app_name=iphone_app_name,
+        iphone_app_store_id=iphone_app_store_id,
+        iphone_url=iphone_url,
     )
 
     return product_instance
 
 
 def notify_admins_for_products(
-    user: CustomUser, file_name: str, products: List[Dict], existing_product_ids: List[str], problematic_product_ids: List[str], all_admins: QuerySet
+        user: CustomUser, file_name: str, products: List[Dict], existing_product_ids: List[str], problematic_product_ids: List[str], all_admins: QuerySet
 ) -> None:
     """
     Notify admins for each successfully uploaded product.

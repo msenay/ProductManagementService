@@ -30,9 +30,9 @@ const Products = () => {
                 headers: {Authorization: `Token ${localStorage.getItem('token')}`},
                 params: {
                     page: page,
-                    condition: filters.condition !== 'All' ? filters.condition : '',
-                    gender: filters.gender !== 'All' ? filters.gender : '',
-                    brand: filters.brand !== 'All' ? filters.brand : '',
+                    condition: filters.condition !== 'All Conditions' ? filters.condition : '',
+                    gender: filters.gender !== 'All Genders' ? filters.gender : '',
+                    brand: filters.brand !== 'All Brands' ? filters.brand : '',
                     sort_by: filters.sortBy,
                     order: filters.order,
                 },
@@ -50,9 +50,9 @@ const Products = () => {
                 headers: {Authorization: `Token ${localStorage.getItem('token')}`},
             });
             setFilterOptions({
-                conditions: ['All', ...response.data.conditions],
-                genders: ['All', ...response.data.genders],
-                brands: ['All', ...response.data.brands],
+                conditions: ['All Conditions', ...response.data.conditions],
+                genders: ['All Genders', ...response.data.genders],
+                brands: ['All Brands', ...response.data.brands],
             });
         } catch (error) {
             console.error('Failed to fetch filter options:', error);
@@ -106,9 +106,9 @@ const Products = () => {
 
     const isFiltering = () => {
         return (
-            filters.condition !== 'All' ||
-            filters.gender !== 'All' ||
-            filters.brand !== 'All'
+            filters.condition !== 'All Conditions' ||
+            filters.gender !== 'All Genders' ||
+            filters.brand !== 'All Brands'
         );
     };
 
@@ -175,38 +175,74 @@ const Products = () => {
                                     <thead>
                                     <tr>
                                         <th>ID</th>
+                                        <th>Image Link</th>
                                         <th>Title</th>
                                         <th>Product Type</th>
+                                        <th>Brand</th>
                                         <th>Link</th>
-                                        <th>Description</th>
-                                        <th>Image Link</th>
                                         <th>Price</th>
                                         <th>Sale Price</th>
+                                        <th>Old Price</th>
                                         <th>Final Price</th>
                                         <th>Availability</th>
-                                        <th>Google Product Category</th>
-                                        <th>Brand</th>
-                                        <th>GTIN</th>
-                                        <th>Item Group ID</th>
-                                        <th>Condition</th>
-                                        <th>Age Group</th>
                                         <th>Color</th>
                                         <th>Gender</th>
                                         <th>Quantity</th>
+                                        <th>Condition</th>
+                                        <th>Age Group</th>
+                                        <th>Description</th>
+                                        <th>Google Product Category</th>
+                                        <th>GTIN</th>
+                                        <th>Item Group ID</th>
                                         <th>Custom Label 0</th>
                                         <th>Custom Label 1</th>
                                         <th>Custom Label 2</th>
                                         <th>Custom Label 3</th>
                                         <th>Custom Label 4</th>
+                                        <th>iPhone App Name</th>
+                                        <th>iPhone App Store ID</th>
+                                        <th>iPhone URL</th>
+                                        <th>Discount Percent</th>
+                                        <th>Gender Original Value</th>
+                                        <th>Adult</th>
+                                        <th>Adwords Labels</th>
+                                        <th>Additional Images Count</th>
+                                        <th>iOS URL</th>
+                                        <th>iOS App Store ID</th>
+                                        <th>iOS App Name</th>
+                                        <th>Android Package</th>
+                                        <th>Android App Name</th>
+                                        <th>Options Percentage</th>
+                                        <th>Icon Media URL</th>
+                                        <th>All Sizes SKUs</th>
+                                        <th>Sizes of All SKUs</th>
+                                        <th>Product Season</th>
+                                        <th>Product Class</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {products.map((product) => (
                                         <tr key={product.id}>
                                             <td>{product.id}</td>
+                                            <td>
+                                                <a href={product.image_link} target="_blank" rel="noopener noreferrer">
+                                                    <img src={product.image_link} alt={product.title} style={{width: '100px', height: '100px'}}/>
+                                                </a>
+                                            </td>
                                             <td>{product.title}</td>
                                             <td>{product.product_type}</td>
+                                            <td>{product.brand}</td>
                                             <td><a href={product.link} target="_blank" rel="noopener noreferrer">View</a></td>
+                                            <td>{product.price}</td>
+                                            <td>{product.sale_price}</td>
+                                            <th>{product.old_price}</th>
+                                            <td>{product.final_price}</td>
+                                            <td>{product.availability}</td>
+                                            <td>{product.color}</td>
+                                            <td>{product.gender}</td>
+                                            <td>{product.quantity}</td>
+                                            <td>{product.condition}</td>
+                                            <td>{product.age_group}</td>
                                             <td className="description">
                                                 <div
                                                     dangerouslySetInnerHTML={{
@@ -214,29 +250,33 @@ const Products = () => {
                                                     }}
                                                 />
                                             </td>
-                                            <td>
-                                                <a href={product.image_link} target="_blank" rel="noopener noreferrer">
-                                                    <img src={product.image_link} alt={product.title} style={{width: '100px', height: '100px'}}/>
-                                                </a>
-                                            </td>
-                                            <td>{product.price}</td>
-                                            <td>{product.sale_price}</td>
-                                            <td>{product.finalprice}</td>
-                                            <td>{product.availability}</td>
                                             <td>{product.google_product_category}</td>
-                                            <td>{product.brand}</td>
                                             <td>{product.gtin}</td>
                                             <td>{product.item_group_id}</td>
-                                            <td>{product.condition}</td>
-                                            <td>{product.age_group}</td>
-                                            <td>{product.color}</td>
-                                            <td>{product.gender}</td>
-                                            <td>{product.quantity}</td>
                                             <td>{product.custom_label_0}</td>
                                             <td>{product.custom_label_1}</td>
                                             <td>{product.custom_label_2}</td>
                                             <td>{product.custom_label_3}</td>
                                             <td>{product.custom_label_4}</td>
+                                            <td>{product.iphone_app_name}</td>
+                                            <td>{product.iphone_app_store_id}</td>
+                                            <td>{product.iphone_url}</td>
+                                            <td>{product.discount_percent}</td>
+                                            <td>{product.gender_orig_value}</td>
+                                            <td>{product.adult}</td>
+                                            <td>{product.adwords_labels}</td>
+                                            <td>{product.additional_images_count}</td>
+                                            <td>{product.ios_url}</td>
+                                            <td>{product.ios_app_store_id}</td>
+                                            <td>{product.ios_app_name}</td>
+                                            <td>{product.android_package}</td>
+                                            <td>{product.android_app_name}</td>
+                                            <td>{product.options_percentage}</td>
+                                            <td>{product.icon_media_url}</td>
+                                            <td>{product.all_sizes_skus}</td>
+                                            <td>{product.sizes_of_all_skus}</td>
+                                            <td>{product.product_season}</td>
+                                            <td>{product.product_class}</td>
                                         </tr>
                                     ))}
                                     </tbody>

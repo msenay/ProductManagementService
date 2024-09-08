@@ -1,3 +1,4 @@
+# type: ignore
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -27,9 +28,11 @@ class Product(models.Model):
     image_link = models.URLField(max_length=500)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    finalprice = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    old_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    final_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    discount_percent = models.CharField(max_length=50, null=True, blank=True)
     availability = models.CharField(max_length=50)
-    google_product_category = models.CharField(max_length=100)
+    google_product_category = models.CharField(max_length=100, null=True, blank=True)
     brand = models.CharField(max_length=100)
     gtin = models.CharField(max_length=100)
     item_group_id = models.CharField(max_length=50)
@@ -37,12 +40,31 @@ class Product(models.Model):
     age_group = models.CharField(max_length=50)
     color = models.CharField(max_length=50)
     gender = models.CharField(max_length=50, choices=GENDER_CHOICES)
+    gender_orig_value = models.CharField(max_length=50, null=True, blank=True)
     quantity = models.IntegerField()
+    adult = models.BooleanField(default=False)
+    adwords_labels = models.CharField(max_length=255, null=True, blank=True)
+    additional_images_count = models.IntegerField(null=True, blank=True)
+    ios_url = models.URLField(max_length=500, null=True, blank=True)
+    ios_app_store_id = models.CharField(max_length=100, null=True, blank=True)
+    ios_app_name = models.CharField(max_length=100, null=True, blank=True)
+    iphone_app_name = models.CharField(max_length=100, null=True, blank=True)
+    iphone_app_store_id = models.CharField(max_length=100, null=True, blank=True)
+    iphone_url = models.URLField(max_length=500, null=True, blank=True)
+    android_package = models.CharField(max_length=100, null=True, blank=True)
+    android_app_name = models.CharField(max_length=100, null=True, blank=True)
+    options_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    icon_media_url = models.URLField(max_length=500, null=True, blank=True)
+    all_sizes_skus = models.CharField(max_length=255, null=True, blank=True)
+    sizes_of_all_skus = models.CharField(max_length=255, null=True, blank=True)
+    product_season = models.CharField(max_length=100, null=True, blank=True)
+    product_class = models.CharField(max_length=100, null=True, blank=True)
     custom_label_0 = models.CharField(max_length=255, null=True, blank=True)
     custom_label_1 = models.CharField(max_length=255, null=True, blank=True)
     custom_label_2 = models.CharField(max_length=255, null=True, blank=True)
     custom_label_3 = models.CharField(max_length=255, null=True, blank=True)
     custom_label_4 = models.CharField(max_length=255, null=True, blank=True)
+
 
     objects = models.Manager()
 
@@ -62,7 +84,9 @@ class Product(models.Model):
             "image_link": self.image_link,
             "price": str(self.price),
             "sale_price": str(self.sale_price) if self.sale_price else None,
-            "finalprice": str(self.finalprice),
+            "old_price": str(self.old_price) if self.old_price else None,
+            "final_price": str(self.final_price),
+            "discount_percent": str(self.discount_percent) if self.discount_percent else None,
             "availability": self.availability,
             "google_product_category": self.google_product_category,
             "brand": self.brand,
@@ -73,6 +97,20 @@ class Product(models.Model):
             "color": self.color,
             "gender": self.gender,
             "quantity": self.quantity,
+            "adult": self.adult,
+            "adwords_labels": self.adwords_labels,
+            "additional_images_count": self.additional_images_count,
+            "ios_url": self.ios_url,
+            "ios_app_store_id": self.ios_app_store_id,
+            "ios_app_name": self.ios_app_name,
+            "android_package": self.android_package,
+            "android_app_name": self.android_app_name,
+            "options_percentage": str(self.options_percentage) if self.options_percentage else None,
+            "icon_media_url": self.icon_media_url,
+            "all_sizes_skus": self.all_sizes_skus,
+            "sizes_of_all_skus": self.sizes_of_all_skus,
+            "product_season": self.product_season,
+            "product_class": self.product_class,
             "custom_label_0": self.custom_label_0,
             "custom_label_1": self.custom_label_1,
             "custom_label_2": self.custom_label_2,

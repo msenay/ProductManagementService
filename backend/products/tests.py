@@ -1,11 +1,16 @@
+# type: ignore
 from django.test import TestCase
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token
-from products.models import Product, CustomUser
+import xml.etree.ElementTree as ET
+
 from unittest.mock import patch
 import logging
+
+from products.models import Product, CustomUser
+from products.utils import get_text, get_float_text, get_attribute
 
 
 class AuthenticatedTestCase(TestCase):
@@ -462,7 +467,7 @@ class ProductListTests(AuthenticatedTestCase):
                     description="Description A",
                     image_link="http://example.com/a.jpg",
                     price=10.0,
-                    finalprice=10.0,
+                    final_price=10.0,
                     availability="in stock",
                     google_product_category="Category1",
                     brand="BrandX",
@@ -482,7 +487,7 @@ class ProductListTests(AuthenticatedTestCase):
                     description="Description B",
                     image_link="http://example.com/b.jpg",
                     price=20.0,
-                    finalprice=18.0,
+                    final_price=18.0,
                     availability="preorder",
                     google_product_category="Category2",
                     brand="BrandY",
@@ -502,7 +507,7 @@ class ProductListTests(AuthenticatedTestCase):
                     description="Description C",
                     image_link="http://example.com/c.jpg",
                     price=30.0,
-                    finalprice=28.0,
+                    final_price=28.0,
                     availability="out of stock",
                     google_product_category="Category3",
                     brand="BrandX",
@@ -522,7 +527,7 @@ class ProductListTests(AuthenticatedTestCase):
                     description="Description D",
                     image_link="http://example.com/d.jpg",
                     price=40.0,
-                    finalprice=38.0,
+                    final_price=38.0,
                     availability="in stock",
                     google_product_category="Category1",
                     brand="BrandY",
@@ -542,7 +547,7 @@ class ProductListTests(AuthenticatedTestCase):
                     description="Description E",
                     image_link="http://example.com/e.jpg",
                     price=50.0,
-                    finalprice=45.0,
+                    final_price=45.0,
                     availability="preorder",
                     google_product_category="Category2",
                     brand="BrandZ",
@@ -562,7 +567,7 @@ class ProductListTests(AuthenticatedTestCase):
                     description="Description F",
                     image_link="http://example.com/f.jpg",
                     price=60.0,
-                    finalprice=55.0,
+                    final_price=55.0,
                     availability="in stock",
                     google_product_category="Category3",
                     brand="BrandX",
@@ -661,7 +666,7 @@ class ProductDetailTests(AuthenticatedTestCase):
             description="Description A",
             image_link="http://example.com/a.jpg",
             price=10.0,
-            finalprice=10.0,
+            final_price=10.0,
             availability="in stock",
             google_product_category="Category1",
             brand="BrandX",
@@ -732,7 +737,7 @@ class ProductFilterTests(AuthenticatedTestCase):
             description="Description A",
             image_link="http://example.com/a.jpg",
             price=10.0,
-            finalprice=10.0,
+            final_price=10.0,
             availability="in stock",
             google_product_category="Category1",
             brand="BrandX",
@@ -752,7 +757,7 @@ class ProductFilterTests(AuthenticatedTestCase):
             description="Description B",
             image_link="http://example.com/b.jpg",
             price=20.0,
-            finalprice=18.0,
+            final_price=18.0,
             availability="preorder",
             google_product_category="Category2",
             brand="BrandY",
@@ -772,7 +777,7 @@ class ProductFilterTests(AuthenticatedTestCase):
             description="Description C",
             image_link="http://example.com/c.jpg",
             price=30.0,
-            finalprice=28.0,
+            final_price=28.0,
             availability="out of stock",
             google_product_category="Category3",
             brand="BrandZ",
@@ -802,3 +807,72 @@ class ProductFilterTests(AuthenticatedTestCase):
         self.assertCountEqual(conditions, ["new", "used"])
         self.assertCountEqual(genders, ["unisex", "male", "female"])
         self.assertCountEqual(brands, ["BrandX", "BrandY", "BrandZ"])
+
+
+class TestUtils(TestCase):
+    """
+    Unit tests for utility functions defined in the 'products.utils' module.
+
+    This test class includes unit tests for the following utility functions:
+    - get_text: Safely retrieves text from an XML element, returning a default value if the element or its text is None.
+    - get_float_text: Safely retrieves a floating-point number from an XML element's text, returning a default value if the element or text is None or raises a ValueError for
+    invalid floats.
+
+    Each test method validates different cases, including:
+    - Valid XML elements with text.
+    - XML elements without text, expecting default values.
+    - Handling of None elements.
+    - Handling of valid and invalid float values in XML text.
+
+    These tests ensure that the utility functions behave correctly and robustly handle edge cases.
+    """
+
+    def test_get_text_element_with_text(self):
+        element = ET.Element("test")
+        element.text = "sample text"
+        self.assertEqual(get_text(element, "default text"), "sample text")
+
+    def test_get_text_element_without_text(self):
+        element = ET.Element("test")
+        self.assertEqual(get_text(element, "default text"), "default text")
+
+    def test_get_text_element_none(self):
+        self.assertEqual(get_text(None, "default text"), "default text")
+
+    def test_get_float_text_element_with_valid_float(self):
+        element = ET.Element("test")
+        element.text = "123.45"
+        self.assertEqual(get_float_text(element, 0.0), 123.45)
+
+    def test_get_float_text_element_with_valid_float_and_extra_spaces(self):
+        element = ET.Element("test")
+        element.text = "123.45 extra"
+        self.assertEqual(get_float_text(element, 0.0), 123.45)
+
+    def test_get_float_text_element_with_invalid_float(self):
+        element = ET.Element("test")
+        element.text = "invalid"
+        with self.assertRaises(ValueError):
+            get_float_text(element, 0.0)
+
+    def test_get_float_text_element_none(self):
+        self.assertEqual(get_float_text(None, 0.0), 0.0)
+
+    def test_get_float_text_element_with_default(self):
+        self.assertEqual(get_float_text(None, 99.99), 99.99)
+
+    def test_get_attribute_with_value(self):
+        element = ET.Element("test")
+        element.set("content", "attribute value")
+        self.assertEqual(get_attribute(element, "content"), "attribute value")
+
+    def test_get_attribute_with_default(self):
+        element = ET.Element("test")
+        self.assertEqual(get_attribute(element, "non_existent_attribute", "default value"), "default value")
+
+    def test_get_attribute_none_element(self):
+        self.assertEqual(get_attribute(None, "content", "default value"), "default value")
+
+    def test_get_attribute_with_no_attribute(self):
+        element = ET.Element("test")
+        self.assertEqual(get_attribute(element, "non_existent_attribute", "default value"), "default value")

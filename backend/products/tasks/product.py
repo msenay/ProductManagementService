@@ -1,3 +1,4 @@
+from typing import Optional
 import dramatiq
 import os
 import smtplib
@@ -46,12 +47,16 @@ def send_notification(notification_data: dict) -> None:
 
     user_email = notification_data.get("user_email")
     user_name = notification_data.get("user_name")
-    admin_email = notification_data.get("admin_email")
+    admin_email: Optional[str] = notification_data.get("admin_email")
     file_name = notification_data.get("file_name")
     existing_product_ids = notification_data.get("existing_product_ids", [])
     problematic_product_ids = notification_data.get("problematic_product_ids", [])
     product = notification_data.get("product", {})
     status = notification_data.get("status")
+
+    if not admin_email:
+        logger.error("Admin email is missing. Notification cannot be sent.")
+        return
 
     if status == "notify_success":
         product_details = "\n".join([f"{key}: {value}" for key, value in product.items()])

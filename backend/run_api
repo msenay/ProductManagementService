@@ -3,11 +3,12 @@
 # Make migrations for the 'products' app
 echo "Migration files are being created for the 'products' app..."
 python manage.py makemigrations products
+echo "----------------------------------------"
 
 # Apply database migrations
 echo "Database migrations are being applied..."
 python manage.py migrate --noinput
-
+echo "----------------------------------------"
 
 # Check if the admin user exists, if not, create one [It is for testing admin notifications]
 echo "Checking if admin user exists..."
@@ -18,8 +19,8 @@ print(User.objects.filter(is_superuser=True).exists())
 ")
 
 if [ "$admin_user" == "False" ]; then
-    echo "Admin user does not exist. Creating admin user..."
-    python manage.py shell -c "
+  echo "Admin user does not exist. Creating admin user..."
+  python manage.py shell -c "
 import os;
 from django.contrib.auth import get_user_model;
 User = get_user_model();
@@ -29,18 +30,28 @@ User.objects.create_superuser(
     os.environ.get('DJANGO_ADMIN_PASSWORD', 'adminpassword')
 )
 "
-    echo "Admin user created with credentials from environment variables."
+  echo "Admin user created with credentials from environment variables."
 else
-    echo "Admin user already exists."
+  echo "Admin user already exists."
 fi
+echo "----------------------------------------"
 
 # Run tests
 echo "Running tests..."
 python manage.py test
 if [ $? -ne 0 ]; then
-    echo "Tests failed. Server will not start."
-    exit 1
+  echo "Tests failed. Server will not start."
+  exit 1
 fi
+echo "----------------------------------------"
+
+# Run linters
+echo "Running mypy..."
+mypy --explicit-package-bases .
+echo "----------------------------------------"
+echo "Running ruff..."
+ruff check .
+echo "----------------------------------------"
 
 # Start the Django server
 echo "Django server is starting..."
