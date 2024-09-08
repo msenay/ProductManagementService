@@ -10,7 +10,7 @@ from unittest.mock import patch
 import logging
 
 from products.models import Product, CustomUser
-from products.utils import get_text, get_float_text, get_attribute
+from products.utils import get_text, get_float_text, get_attribute, format_product_details, create_email_html
 
 
 class AuthenticatedTestCase(TestCase):
@@ -876,3 +876,77 @@ class TestUtils(TestCase):
     def test_get_attribute_with_no_attribute(self):
         element = ET.Element("test")
         self.assertEqual(get_attribute(element, "non_existent_attribute", "default value"), "default value")
+
+    def test_format_product_details_with_valid_dict(self):
+        product_details = {
+            "id": "123",
+            "name": "Test Product",
+            "price": "100.00",
+            "availability": "in stock"
+        }
+        expected_output = (
+            "<p><strong>id:</strong> 123<br>"
+            "<strong>name:</strong> Test Product<br>"
+            "<strong>price:</strong> 100.00<br>"
+            "<strong>availability:</strong> in stock</p>"
+        )
+        self.assertEqual(format_product_details(product_details), expected_output)
+
+    def test_format_product_details_with_empty_dict(self):
+        product_details = {}
+        expected_output = "<p></p>"
+        self.assertEqual(format_product_details(product_details), expected_output)
+
+    def test_format_product_details_with_none_value(self):
+        product_details = {
+            "id": "123",
+            "name": None,
+            "price": "100.00",
+            "availability": "in stock"
+        }
+        expected_output = (
+            "<p><strong>id:</strong> 123<br>"
+            "<strong>name:</strong> None<br>"
+            "<strong>price:</strong> 100.00<br>"
+            "<strong>availability:</strong> in stock</p>"
+        )
+        self.assertEqual(format_product_details(product_details), expected_output)
+
+    def test_create_email_html_notify_success(self):
+        product_details = {
+            "id": "123",
+            "name": "Test Product",
+            "price": "100.00",
+            "availability": "in stock"
+        }
+        existing_product_ids = ["001", "002"]
+        problematic_product_ids = ["003"]
+        subject = "Product Upload Successful"
+        user_name = "Test User"
+        user_email = "testuser@example.com"
+        file_name = "test-file.xml"
+        status = "notify_success"
+
+        html_output = create_email_html(subject, user_name, user_email, file_name, product_details, existing_product_ids, problematic_product_ids, status)
+
+        # Basic checks for content
+        self.assertIn("<h1>Product Upload Successful</h1>", html_output)
+        self.assertIn("<strong>id:</strong> 123", html_output)
+        self.assertIn("<strong>Existing Product IDs:</strong> 001, 002", html_output)
+        self.assertIn("<strong>Problematic Product IDs:</strong> 003", html_output)
+
+    def test_create_email_html_notify_failure(self):
+        product_details = {}
+        existing_product_ids = []
+        problematic_product_ids = []
+        subject = "Product Upload Failed"
+        user_name = "Test User"
+        user_email = "testuser@example.com"
+        file_name = "test-file.xml"
+        status = "notify_failure"
+
+        html_output = create_email_html(subject, user_name, user_email, file_name, product_details, existing_product_ids, problematic_product_ids, status)
+
+        # Basic checks for content
+        self.assertIn("<h1>Product Upload Failed</h1>", html_output)
+        self.assertIn(f"<p>While user {user_name} ({user_email}) was uploading document '{file_name}', an error occurred.</p>", html_output)
