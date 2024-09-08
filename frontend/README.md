@@ -91,6 +91,7 @@ The frontend interacts with the following backend API endpoints:
 The application uses JWT tokens for authentication. After logging in, the token is stored in localStorage, and it is sent with each API request that requires authorization.
 
 ### Testing
+Test files are located in the [tests](src/tests) directory. To run the tests, use the following command:
 ```bash
 npm test -- --watchAll=false
 ```
