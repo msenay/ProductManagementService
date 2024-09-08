@@ -166,7 +166,7 @@ def create_product_instance(item: ET.Element, namespace: Dict[str, str]) -> Prod
 
 
 def notify_admins_for_products(
-        user: CustomUser, file_name: str, products: List[Dict], existing_product_ids: List[str], problematic_product_ids: List[str], all_admins: QuerySet
+    user: CustomUser, file_name: str, products: List[Dict], existing_product_ids: List[str], problematic_product_ids: List[str], all_admins: QuerySet
 ) -> None:
     """
     Notify admins for each successfully uploaded product.

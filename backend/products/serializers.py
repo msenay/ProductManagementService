@@ -4,6 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for the CustomUser model.

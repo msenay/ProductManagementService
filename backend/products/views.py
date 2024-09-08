@@ -179,10 +179,7 @@ def list_products(request) -> Response:
     products = Product.objects.all()
 
     if not products.exists():
-        return Response({
-            "results": [],
-            "total_pages": 0
-        })
+        return Response({"results": [], "total_pages": 0})
 
     # Filtering
     condition = filters.get("condition")
