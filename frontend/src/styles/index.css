@@ -13,6 +13,26 @@ html, body {
     min-height: 100vh;
 }
 
+main {
+    flex: 1;
+    padding: 20px;
+    margin-bottom: 60px;
+}
+
+
+footer {
+    background-color: #000;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+}
+
+
 
 code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
@@ -62,19 +82,3 @@ header img {
     width: 150px;
     height: auto;
 }
-
-main {
-    flex: 1;
-    padding: 20px;
-}
-
-footer {
-    background-color: #000;
-    color: #fff;
-    text-align: center;
-    padding: 10px 0;
-    margin-top: auto;
-}
-
-
-

@@ -235,7 +235,7 @@ const Products = () => {
                                             <td><a href={product.link} target="_blank" rel="noopener noreferrer">View</a></td>
                                             <td>{product.price}</td>
                                             <td>{product.sale_price}</td>
-                                            <th>{product.old_price}</th>
+                                            <td>{product.old_price}</td>
                                             <td>{product.final_price}</td>
                                             <td>{product.availability}</td>
                                             <td>{product.color}</td>
