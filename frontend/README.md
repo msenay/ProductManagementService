@@ -46,6 +46,7 @@ src/
 ├── tests/                      # Test files for various components and functionality
 │   ├── App.test.js             # Tests for the main App component
 │   ├── SignIn.test.js          # Unit tests for the SignIn component
+│   ├── Products.test.js        # Unit tests for the Products component
 │   └── SignUp.test.js          # Unit tests for the SignUp component
 │
 ├── App.js                      # Main component that renders the entire application
@@ -82,6 +83,7 @@ The frontend interacts with the following backend API endpoints:
 ```text
 /login/: Authenticates users.
 /signup/: Registers new users.
+/logout/: Logs out the authenticated user.
 /list-products/: Fetches the list of products.
 /upload-products/: Allows users to upload product data.
 /filter-options/: Provides filter options like conditions, gender, and brands.
