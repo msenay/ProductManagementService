@@ -34,12 +34,16 @@ ProductManagementService/
 ## Features
 
 #### [Frontend](frontend)
-User Authentication: Users can register, log in, and log out.
+User Authentication: Users can register, log in, and log out. 
+
 Product Listing: Users can view paginated, filtered, and sorted product listings.
+
 Product Upload: Users can upload products via an XML file.
 #### [Backend](backend)
 User Management: User registration and authentication with token-based JWT.
+
 Product Management: Upload, list, and filter products via RESTful APIs.
+
 Background Tasks: Asynchronous task queue using Dramatiq to send notification emails to admins after product uploads.
 
 ### Setup Instructions
