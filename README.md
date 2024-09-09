@@ -66,6 +66,8 @@ DJANGO_ADMIN_EMAIL=<DJANGO_ADMIN_EMAIL>
 DJANGO_ADMIN_PASSWORD=<DJANGO_ADMIN_PASSWORD>
 ```
 
+After service build, You can also reach the admin panel via [http://localhost:8000/admin/](http://localhost:8000/admin/) with the credentials you set in the .env file.
+
 Copy the [.env.template](backend/.env.template) to backend/.env:
 ```bash
 cp backend/.env.template backend/.env
