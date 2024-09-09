@@ -263,7 +263,7 @@ const Products = () => {
                                             <td>{product.iphone_url}</td>
                                             <td>{product.discount_percent}</td>
                                             <td>{product.gender_orig_value}</td>
-                                            <td>{product.adult}</td>
+                                            <td>{product.adult ? 'Yes' : 'No'}</td>
                                             <td>{product.adwords_labels}</td>
                                             <td>{product.additional_images_count}</td>
                                             <td>{product.ios_url}</td>
@@ -272,7 +272,7 @@ const Products = () => {
                                             <td>{product.android_package}</td>
                                             <td>{product.android_app_name}</td>
                                             <td>{product.options_percentage}</td>
-                                            <td>{product.icon_media_url}</td>
+                                            <td><a href={product.icon_media_url} target="_blank" rel="noopener noreferrer">Icon Url</a></td>
                                             <td>{product.all_sizes_skus}</td>
                                             <td>{product.sizes_of_all_skus}</td>
                                             <td>{product.product_season}</td>
