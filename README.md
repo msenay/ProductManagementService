@@ -54,18 +54,21 @@ cd ProductManagementService
 Both the frontend and backend require environment variables for configuration. These variables are defined in .env.template files located in the respective directories.You can do it manually or via terminal commands like above.
 
 ##### Backend Setup:
+
+#### ! Please change here - [.env.template](backend/.env.template) - in order to get email. This will create an admin user for you. ! so you get notify when a product is uploaded. !
+```env
+DJANGO_ADMIN_USERNAME=<DJANGO_ADMIN_USERNAME>
+DJANGO_ADMIN_EMAIL=<DJANGO_ADMIN_EMAIL>
+DJANGO_ADMIN_PASSWORD=<DJANGO_ADMIN_PASSWORD>
+```
+
 Copy the [.env.template](backend/.env.template) to backend/.env:
 ```bash
 cp backend/.env.template backend/.env
 ```
 Modify the backend/.env file to add the correct values for database connection, Redis, email settings, and API configuration.
 
-#### ! Please change here in order to get email. This will create an admin user for you. ! so you get notify when a product is uploaded. !
-```env
-DJANGO_ADMIN_USERNAME=<DJANGO_ADMIN_USERNAME>
-DJANGO_ADMIN_EMAIL=<DJANGO_ADMIN_EMAIL>
-DJANGO_ADMIN_PASSWORD=<DJANGO_ADMIN_PASSWORD>
-```
+
 ##### Frontend Setup:
 Copy the [.env.template](frontend/.env.template) to frontend/.env:
 ```bash
